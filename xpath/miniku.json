@@ -1,11 +1,7 @@
 {
   "ua": "",
   "homeUrl": "https://91mjw.com",
-  "dcVipFlag": "true",
-  "pCfgJs": "https://miniku.cc/static/js/playerconfig.js",
-  "pCfgJsR": "[\\W|\\S|.]*?MacPlayerConfig.player_list[\\W|\\S|.]*?=([\\W|\\S|.]*?),MacPlayerConfig.downer_list",
-  "dcShow2Vip": {},
-  "dcPlayUrl": "true",
+  
   "cateNode": "//ul[contains(@class,'nav')]/li/a[contains(@href, '') ]",
   "cateName": "/text()",
   "cateId": "/@href",
