@@ -344,7 +344,7 @@ public class XPathRule {
             rule.homeVodImg = jsonObj.optString("homeVodImg").trim();
             rule.homeVodImgR = getPattern(jsonObj, "homeVodImgR");
             rule.homeVodMark = jsonObj.optString("homeVodMark").trim();
-            rule.homeVodMarkR = getPattern(jsonObj, "homeVodNameR");
+            rule.homeVodMarkR = getPattern(jsonObj, "homeVodMarkR");
             rule.cateUrl = jsonObj.optString("cateUrl").trim();
             rule.cateVodNode = jsonObj.optString("cateVodNode").trim();
             rule.cateVodName = jsonObj.optString("cateVodName").trim();
@@ -395,7 +395,7 @@ public class XPathRule {
             rule.scVodImg = jsonObj.optString("scVodImg").trim();
             rule.scVodImgR = getPattern(jsonObj, "scVodImgR");
             rule.scVodMark = jsonObj.optString("scVodMark").trim();
-            rule.scVodMarkR = getPattern(jsonObj, "scVodNameR");
+            rule.scVodMarkR = getPattern(jsonObj, "scVodMarkR");
             return rule;
         } catch (Exception e) {
             SpiderDebug.log(e);
