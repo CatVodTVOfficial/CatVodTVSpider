@@ -131,9 +131,25 @@ public class XPath extends Spider {
         }
         return "";
     }
-
+// 分类 cateurl 需自行设置 key & 开启 filterable
     protected String categoryUrl(String tid, String pg, boolean filter, HashMap<String, String> extend) {
-        return rule.getCateUrl().replace("{cateId}", tid).replace("{catePg}", pg);
+        String CateUrl = rule.getCateUrl();
+        if (filter && extend != null && extend.size() > 0) {
+                for (Iterator<String> it = extend.keySet().iterator(); it.hasNext(); ) {
+                    String key = it.next();
+                    String value = extend.get(key);
+                    if (value.length() > 0) {
+                        CateUrl =CateUrl.replace("{" + key + "}", URLEncoder.encode(value));
+                    }
+                    }
+                }
+        CateUrl= CateUrl.replace("{cateId}", tid).replace("{catePg}", pg);
+        Matcher m = Pattern.compile("\\{(.*?)\\}").matcher(CateUrl);
+        while (m.find()) {
+            String n=m.group(0).replace("{","").replace("}","");
+            CateUrl= CateUrl.replace(m.group(0), "").replace("/"+n+"/","");
+        }
+        return CateUrl;
     }
 
     @Override
