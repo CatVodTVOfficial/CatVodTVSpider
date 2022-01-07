@@ -93,7 +93,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/cat@main/rewrite/xpath/Renjie.json"
+      "ext": "https://cdn.jsdelivr.net/gh/catvod/CatVodTVSpider@master/xpath/Renjie.json"
     },
     {
       "key": "Gimy",
@@ -103,7 +103,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/cat@main/rewrite/xpath/Gimy.json"
+      "ext": "https://cdn.jsdelivr.net/gh/catvod/CatVodTVSpider@master/xpath/Gimy.json"
     },
     {
       "key": "Jumi",
@@ -113,7 +113,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/cat@main/rewrite/xpath/Jumi.json"
+      "ext": "https://cdn.jsdelivr.net/gh/catvod/CatVodTVSpider@master/xpath/Jumi.json"
     },
     {
       "key": "Djx",
@@ -123,7 +123,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/cat@main/rewrite/xpath/Djx.json"
+      "ext": "https://cdn.jsdelivr.net/gh/catvod/CatVodTVSpider@master/xpath/Djx.json"
     },
     {
       "key": "独播库",
@@ -133,7 +133,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/cat@main/rewrite/xpath/Duboku.json"
+      "ext": "https://cdn.jsdelivr.net/gh/catvod/CatVodTVSpider@master/xpath/Duboku.json"
     },
     {
       "key": "Sky4k",
@@ -143,7 +143,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/cat@main/rewrite/xpath/Sky4k.json"
+      "ext": "https://cdn.jsdelivr.net/gh/catvod/CatVodTVSpider@master/xpath/Sky4k.json"
     },
     {
       "key": "Nfuxs",
@@ -153,7 +153,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/cat@main/rewrite/xpath/Nfuxs.json"
+      "ext": "https://cdn.jsdelivr.net/gh/catvod/CatVodTVSpider@master/xpath/Nfuxs.json"
     }
 
 ```
