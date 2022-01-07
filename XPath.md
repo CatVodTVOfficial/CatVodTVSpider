@@ -86,68 +86,8 @@
       "ext": "https://cdn.jsdelivr.net/gh/lite-cucumber/CatVodTVSpider@master/xpath/dm84.json"
     },
     {
-      "key": "csp_xpath_egg",
-      "name": "蛋蛋影院(XPath)",
-      "type": 3,
-      "api": "csp_XPathEgg",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 0,
-      "ext": "https://cdn.jsdelivr.net/gh/lite-cucumber/CatVodTVSpider@master/xpath/egg.json"
-    },
-    {
-      "key": "csp_xpath_555",
-      "name": "555电影(XPath)",
-      "type": 3,
-      "api": "csp_XPath",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 0,
-      "ext": "https://cdn.jsdelivr.net/gh/lite-cucumber/CatVodTVSpider@master/xpath/555.json"
-    },
-    {
-      "key": "csp_xpath_4kyu",
-      "name": "一只鱼4K(XPath)",
-      "type": 3,
-      "api": "csp_XPath",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 0,
-      "ext": "https://cdn.jsdelivr.net/gh/lite-cucumber/CatVodTVSpider@master/xpath/4kyu.json"
-    },
-    {
-      "key": "csp_xpath_miniku",
-      "name": "Miniku(XPath)",
-      "type": 3,
-      "api": "csp_XPath",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 0,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/CatVodTVSpider@master/xpath/miniku.json"
-    },
-    {
-      "key": "csp_xpath_pianba",
-      "name": "Pianba(XPath)",
-      "type": 3,
-      "api": "csp_XPath",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 0,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/CatVodTVSpider@master/xpath/pianba.json"
-    },
-    {
-      "key": "csp_xpath_Ole",
-      "name": "Ole(EXO)",
-      "type": 3,
-      "api": "csp_XPath",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 0,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/CatVodTVSpider@master/xpath/olevod.json"
-    },
-    {
       "key": "唐人街",
-      "name": "唐人街(P)",
+      "name": "唐人街(XPath)",
       "type": 3,
       "api": "csp_XPathMacFilter",
       "searchable": 1,
@@ -157,7 +97,7 @@
     },
     {
       "key": "Gimy",
-      "name": "Gimy(P)",
+      "name": "Gimy(XPath)",
       "type": 3,
       "api": "csp_XPathMacFilter",
       "searchable": 1,
@@ -167,7 +107,7 @@
     },
     {
       "key": "Jumi",
-      "name": "Jumi(P)",
+      "name": "Jumi(XPath)",
       "type": 3,
       "api": "csp_XPathMacFilter",
       "searchable": 1,
@@ -177,7 +117,7 @@
     },
     {
       "key": "Djx",
-      "name": "瓜皮TV(P)",
+      "name": "瓜皮TV(XPath)",
       "type": 3,
       "api": "csp_XPathFilter",
       "searchable": 1,
@@ -187,7 +127,7 @@
     },
     {
       "key": "独播库",
-      "name": "独播库(P)",
+      "name": "独播库(XPath)",
       "type": 3,
       "api": "csp_XPathMacFilter",
       "searchable": 1,
@@ -197,7 +137,7 @@
     },
     {
       "key": "Sky4k",
-      "name": "Sky4k(P)[en]",
+      "name": "Sky4k(XPath)[en]",
       "type": 3,
       "api": "csp_XPathMacFilter",
       "searchable": 1,
@@ -207,23 +147,13 @@
     },
     {
       "key": "Nfuxs",
-      "name": "南府(P)",
+      "name": "南府备用(XPath)",
       "type": 3,
       "api": "csp_XPathFilter",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
       "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/cat@main/rewrite/xpath/Nfuxs.json"
-    },
-    {
-      "key": "Aixixi",
-      "name": "爱西西(P)",
-      "type": 3,
-      "api": "csp_XPathFilter",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "https://cdn.jsdelivr.net/gh/Tangsan99999/cat@main/rewrite/xpath/Aixixi.json"
     }
 
 ```
