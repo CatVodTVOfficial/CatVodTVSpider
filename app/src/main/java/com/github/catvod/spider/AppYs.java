@@ -909,7 +909,7 @@ public class AppYs extends Spider {
         if (uu.contains("baidu.com")) {
             String playurl = uu.split("wd=")[1];
             if (playurl.contains("duoduozy.com")) {
-                String uuu = "https://player.duoduozy.com/ddplay/?url=" + playurl;
+                String uuu = "https://www.6080kan.cc/app.php?url=" + playurl;
                 HashMap<String, String> headers = new HashMap();
                 headers.put("referer", "https://www.duoduozy.com/");
                 SpiderReqResult srr = SpiderReq.get(new SpiderUrl(uuu, headers));
