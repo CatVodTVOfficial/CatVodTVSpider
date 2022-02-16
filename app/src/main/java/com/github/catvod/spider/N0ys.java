@@ -1,6 +1,7 @@
 package com.github.catvod.spider;
 
 import android.content.Context;
+import android.net.Uri;
 import android.text.TextUtils;
 
 import com.github.catvod.crawler.Spider;
@@ -395,7 +396,8 @@ public class N0ys extends Spider {
                             String content1 = srr1.content;
                             Document doc1 = Jsoup.parse(content1);
                             String url2 = doc1.selectFirst("iframe#WANG").attr("src");
-                            hds.put("Host", "jx1090ys2.qx12345.top");
+                            String url2host = Uri.parse(url2).getHost();
+                            hds.put("Host", url2host);
                             hds.put("Referer", "http://1090ys2.com/");
                             SpiderUrl su2 = new SpiderUrl(url2, hds);
                             SpiderReqResult srr2 = SpiderReq.get(su2);
@@ -432,11 +434,11 @@ public class N0ys extends Spider {
                                 gtk += ((byte) pt.charAt(j)) * (j + offset);
                                 gtk %= gtk1;
                             }
-                            String finalVideoUrl = "http://jx1090ys2.qx12345.top/hls/play/" + vvid + "%7C" + time + "%7C" + skey + "%7C" + pt + "%7C" + bkn + "%7C" + gtk + ".m3u8";
+                            String finalVideoUrl = "http://" + url2host + "/hls/play/" + vvid + "%7C" + time + "%7C" + skey + "%7C" + pt + "%7C" + bkn + "%7C" + gtk + ".m3u8";
                             result.put("parse", pCfg.getInt("sn"));
                             result.put("playUrl", "");
                             result.put("url", finalVideoUrl);
-                            result.put("header", "");
+                            result.put("header", "{\"Referer\":\" " + url2 + "\"}");
                         } else {
                             result.put("parse", pCfg.getInt("sn"));
                             result.put("playUrl", playUrl);

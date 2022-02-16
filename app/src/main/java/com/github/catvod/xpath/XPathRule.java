@@ -45,6 +45,11 @@ public class XPathRule {
     private LinkedHashMap<String, String> cateManual = new LinkedHashMap<>();
 
     /**
+     * 筛选
+     */
+    private JSONObject filter;
+
+    /**
      * 更新推荐视频节点 xpath
      */
     private String homeVodNode;
@@ -336,6 +341,7 @@ public class XPathRule {
                     rule.cateManual.put(name.trim(), navs.getString(name).trim());
                 }
             }
+            rule.filter = jsonObj.optJSONObject("filter");
             rule.homeVodNode = jsonObj.optString("homeVodNode").trim();
             rule.homeVodName = jsonObj.optString("homeVodName").trim();
             rule.homeVodNameR = getPattern(jsonObj, "homeVodNameR");
@@ -433,6 +439,10 @@ public class XPathRule {
 
     public LinkedHashMap<String, String> getCateManual() {
         return cateManual;
+    }
+
+    public JSONObject getFilter() {
+        return filter;
     }
 
     public String getHomeVodNode() {

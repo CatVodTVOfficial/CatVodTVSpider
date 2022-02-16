@@ -1,6 +1,7 @@
 {
   "ua": "",
   "homeUrl": "https://www.dandanzan.cc",
+  "decodeTk": "填上猫大解密接口的口令，注意保密",
   "cateNode": "//div[@class='nav']/ul/li/a[@href!='/']",
   "cateName": "/text()",
   "cateId": "/@href",

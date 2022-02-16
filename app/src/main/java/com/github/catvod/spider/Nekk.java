@@ -33,8 +33,8 @@ import java.util.regex.Pattern;
 
 public class Nekk extends Spider {
 
-    private static final String siteUrl = "https://9ehao.com";
-    private static final String siteHost = "9ehao.com";
+    private static final String siteUrl = "https://9egood.com";
+    private static final String siteHost = "9egood.com";
 
     protected JSONObject playerConfig;
     protected JSONObject filterConfig;
@@ -385,7 +385,13 @@ public class Nekk extends Spider {
                         result.put("parse", pCfg.getInt("sn"));
                         result.put("playUrl", playUrl);
                         result.put("url", videoUrl);
-                        result.put("header", "");
+                        if (flag.equals("9ekk")) {
+                            JSONObject headers = new JSONObject();
+                            headers.put("Referer", " " + siteUrl);
+                            result.put("header", headers.toString());
+                        } else {
+                            result.put("header", "");
+                        }
                     }
                     break;
                 }

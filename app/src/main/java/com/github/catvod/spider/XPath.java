@@ -1,7 +1,6 @@
 package com.github.catvod.spider;
 
 import android.content.Context;
-import android.net.Uri;
 import android.text.TextUtils;
 
 import com.github.catvod.crawler.Spider;
@@ -9,6 +8,7 @@ import com.github.catvod.crawler.SpiderDebug;
 import com.github.catvod.crawler.SpiderReq;
 import com.github.catvod.crawler.SpiderReqResult;
 import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.Misc;
 import com.github.catvod.xpath.XPathRule;
 
 import org.json.JSONArray;
@@ -77,7 +77,7 @@ public class XPath extends Spider {
                             id = rule.getHomeVodIdR(id);
                             String pic = vodNodes.get(i).selOne(rule.getHomeVodImg()).asString().trim();
                             pic = rule.getHomeVodImgR(pic);
-                            pic = fixUrl(webUrl, pic);
+                            pic = Misc.fixUrl(webUrl, pic);
                             String mark = "";
                             if (!rule.getHomeVodMark().isEmpty()) {
                                 try {
@@ -103,6 +103,9 @@ public class XPath extends Spider {
                 SpiderDebug.log(e);
             }
             result.put("class", classes);
+            if (filter && rule.getFilter() != null) {
+                result.put("filters", rule.getFilter());
+            }
             return result.toString();
         } catch (
                 Exception e) {
@@ -129,7 +132,7 @@ public class XPath extends Spider {
         return "";
     }
 
-    protected String categoryUrl(String tid, String pg) {
+    protected String categoryUrl(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         return rule.getCateUrl().replace("{cateId}", tid).replace("{catePg}", pg);
     }
 
@@ -137,7 +140,7 @@ public class XPath extends Spider {
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         try {
             fetchRule();
-            String webUrl = categoryUrl(tid, pg);
+            String webUrl = categoryUrl(tid, pg, filter, extend);
             SpiderReqResult srr = fetch(webUrl);
             JSONArray videos = new JSONArray();
             JXDocument doc = JXDocument.create(srr.content);
@@ -149,7 +152,7 @@ public class XPath extends Spider {
                 id = rule.getCateVodIdR(id);
                 String pic = vodNodes.get(i).selOne(rule.getCateVodImg()).asString().trim();
                 pic = rule.getCateVodImgR(pic);
-                pic = fixUrl(webUrl, pic);
+                pic = Misc.fixUrl(webUrl, pic);
                 String mark = "";
                 if (!rule.getCateVodMark().isEmpty()) {
                     try {
@@ -199,7 +202,7 @@ public class XPath extends Spider {
 
             cover = vodNode.selOne(rule.getDetailImg()).asString().trim();
             cover = rule.getDetailImgR(cover);
-            cover = fixUrl(webUrl, cover);
+            cover = Misc.fixUrl(webUrl, cover);
 
             if (!rule.getDetailCate().isEmpty()) {
                 try {
@@ -352,10 +355,11 @@ public class XPath extends Spider {
     public String searchContent(String key, boolean quick) {
         try {
             fetchRule();
+            if (rule.getSearchUrl().isEmpty()) {
+                return "";
+            }
             String webUrl = rule.getSearchUrl().replace("{wd}", URLEncoder.encode(key));
-            SpiderDebug.log(webUrl);
-            SpiderUrl su = new SpiderUrl(webUrl, getHeaders(webUrl));
-            SpiderReqResult srr = SpiderReq.get(su);
+            SpiderReqResult srr = fetch(webUrl);
             JSONObject result = new JSONObject();
             JSONArray videos = new JSONArray();
             // add maccms suggest search api support
@@ -373,7 +377,7 @@ public class XPath extends Spider {
                             id = rule.getSearchVodIdR(id);
                             String pic = vod.optString(rule.getSearchVodImg()).trim();
                             pic = rule.getSearchVodImgR(pic);
-                            pic = fixUrl(webUrl, pic);
+                            pic = Misc.fixUrl(webUrl, pic);
                             String mark = vod.optString(rule.getSearchVodMark()).trim();
                             mark = rule.getSearchVodMarkR(mark);
                             JSONObject v = new JSONObject();
@@ -397,7 +401,7 @@ public class XPath extends Spider {
                     id = rule.getSearchVodIdR(id);
                     String pic = vodNodes.get(i).selOne(rule.getSearchVodImg()).asString().trim();
                     pic = rule.getSearchVodImgR(pic);
-                    pic = fixUrl(webUrl, pic);
+                    pic = Misc.fixUrl(webUrl, pic);
                     String mark = "";
                     if (!rule.getCateVodMark().isEmpty()) {
                         try {
@@ -424,24 +428,9 @@ public class XPath extends Spider {
         return "";
     }
 
-    private String fixUrl(String base, String src) {
-        try {
-            if (src.startsWith("//")) {
-                Uri parse = Uri.parse(base);
-                src = parse.getScheme() + ":" + src;
-            } else if (!src.contains("://")) {
-                Uri parse = Uri.parse(base);
-                src = parse.getScheme() + "://" + parse.getHost() + src;
-            }
-        } catch (Exception e) {
-            SpiderDebug.log(e);
-        }
-        return src;
-    }
-
     @Override
     public boolean manualVideoCheck() {
-        return true;
+        return false;
     }
 
     private String[] videoFormatList = new String[]{".m3u8", ".mp4", ".mpeg", ".flv"};

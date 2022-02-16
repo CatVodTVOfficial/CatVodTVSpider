@@ -3,6 +3,7 @@ package com.github.catvod.parser;
 import com.github.catvod.crawler.SpiderDebug;
 import com.github.catvod.crawler.SpiderReq;
 import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.Misc;
 
 import org.json.JSONObject;
 
@@ -26,19 +27,9 @@ public class JsonSequence {
                     SpiderDebug.log(parseUrl);
                     try {
                         String json = SpiderReq.get(new SpiderUrl(parseUrl, null)).content;
-                        JSONObject jsonPlayData = new JSONObject(json);
-                        JSONObject headers = new JSONObject();
-                        String ua = jsonPlayData.optString("user-agent", "");
-                        if (ua.trim().length() > 0) {
-                            headers.put("User-Agent", " " + ua);
-                        }
-                        String referer = jsonPlayData.optString("referer", "");
-                        if (referer.trim().length() > 0) {
-                            headers.put("Referer", " " + referer);
-                        }
-                        JSONObject taskResult = new JSONObject();
-                        taskResult.put("header", headers);
-                        taskResult.put("url", jsonPlayData.getString("url"));
+                        JSONObject taskResult = Misc.jsonParse(url, json);
+                        if (taskResult == null)
+                            continue;
                         taskResult.put("jxFrom", jxName);
                         return taskResult;
                     } catch (Throwable th) {

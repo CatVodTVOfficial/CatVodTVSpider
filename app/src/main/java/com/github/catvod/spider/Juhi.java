@@ -3,6 +3,7 @@ package com.github.catvod.spider;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Base64;
+import com.github.catvod.utils.Misc;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
@@ -18,8 +19,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,31 +31,25 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Demo for self study
- * <p> 
- * Source from Author: CatVod
- */
+public class Juhi extends Spider {
 
-public class Djx extends Spider {
-
-    private static final String siteUrl = "https://www.dijiaxia.com";
-    private static final String siteHost = "dijiaxia.com";
+    private static final String siteUrl = "https://www.juhi.cc/";
+    private static final String siteHost = "juhi.cc";
 
     protected JSONObject playerConfig;
     protected JSONObject filterConfig;
 
-    protected Pattern regexCategory = Pattern.compile("/index.php/vod/type/id/(\\S+).html");
-    protected Pattern regexVid = Pattern.compile("/index.php/vod/detail/id/(\\d+).html");
-    protected Pattern regexPlay = Pattern.compile("/index.php/vod/play/id/(\\d+)/sid/(\\d+)/nid/(\\d+).html");
-    protected Pattern regexPage = Pattern.compile("\\S+/page/(\\d+)\\S+");
+    protected Pattern regexCategory = Pattern.compile("/vodtype/(\\d+)/");
+    protected Pattern regexVid = Pattern.compile("/voddetail/(\\d+)/");
+    protected Pattern regexPlay = Pattern.compile("/vodplay/(\\d+)-(\\d+)-(\\d+)/");
+    protected Pattern regexPage = Pattern.compile("/vodshow/(\\S+)/");
 
     @Override
     public void init(Context context) {
         super.init(context);
         try {
-            playerConfig = new JSONObject("{\"4kmv\":{\"sh\":\"4K蓝光\",\"sn\":0,\"pu\":\"\",\"or\":999},\"HY4K1\":{\"sh\":\"极速蓝光-推荐\",\"sn\":0,\"pu\":\"\",\"or\":999},\"duoduozy\":{\"sh\":\"自营秒播-推荐\",\"sn\":1,\"pu\":\"https://player.duoduozy.com/ddplay/?url=\",\"or\":999},\"renrenmi\":{\"sh\":\"稳定秒播-推荐\",\"sn\":1,\"pu\":\"https://rr.4kbuka.com/?url=\",\"or\":999},\"hnm3u8\":{\"sh\":\"HN备用\",\"sn\":0,\"pu\":\"\",\"or\":999},\"wjm3u8\":{\"sh\":\"WJ备用\",\"sn\":0,\"pu\":\"\",\"or\":999},\"qq\":{\"sh\":\"腾讯视频\",\"sn\":1,\"pu\":\"https://dmku.dijiaxia.com/?url=\",\"or\":999},\"youku\":{\"sh\":\"优酷视频\",\"sn\":1,\"pu\":\"https://dmku.dijiaxia.com/?url=\",\"or\":999},\"qiyi\":{\"sh\":\"奇艺视频\",\"sn\":1,\"pu\":\"https://dmku.dijiaxia.com/?url=\",\"or\":999},\"bilibili\":{\"sh\":\"哔哩哔哩\",\"sn\":0,\"pu\":\"\",\"or\":999},\"mgtv\":{\"sh\":\"芒果TV\",\"sn\":1,\"pu\":\"https://dmku.dijiaxia.com/?url=\",\"or\":999},\"pptv\":{\"sh\":\"PPTV\",\"sn\":1,\"pu\":\"https://dmku.dijiaxia.com/?url=\",\"or\":999},\"sohu\":{\"sh\":\"搜狐视频\",\"sn\":1,\"pu\":\"https://dmku.dijiaxia.com/?url=\",\"or\":999},\"letv\":{\"sh\":\"搜狐视频\",\"sn\":1,\"pu\":\"https://dmku.dijiaxia.com/?url=\",\"or\":999}}");
-            filterConfig = new JSONObject("{\"1\":[{\"key\":\"tid\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"動作片\",\"v\":\"6\"},{\"n\":\"喜劇片\",\"v\":\"7\"},{\"n\":\"愛情片\",\"v\":\"8\"},{\"n\":\"科幻片\",\"v\":\"9\"},{\"n\":\"恐怖片\",\"v\":\"10\"},{\"n\":\"劇情片\",\"v\":\"11\"},{\"n\":\"戰爭片\",\"v\":\"12\"},{\"n\":\"紀錄片\",\"v\":\"20\"}]},{\"key\":\"area\",\"name\":\"地区\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"大陸\",\"v\":\"大陸\"},{\"n\":\"香港\",\"v\":\"香港\"},{\"n\":\"台灣\",\"v\":\"台灣\"},{\"n\":\"美國\",\"v\":\"美國\"},{\"n\":\"法國\",\"v\":\"法國\"},{\"n\":\"英國\",\"v\":\"英國\"},{\"n\":\"日本\",\"v\":\"日本\"},{\"n\":\"韓國\",\"v\":\"韓國\"},{\"n\":\"德國\",\"v\":\"德國\"},{\"n\":\"泰國\",\"v\":\"泰國\"},{\"n\":\"印度\",\"v\":\"印度\"},{\"n\":\"意大利\",\"v\":\"意大利\"},{\"n\":\"西班牙\",\"v\":\"西班牙\"},{\"n\":\"加拿大\",\"v\":\"加拿大\"},{\"n\":\"其他\",\"v\":\"其他\"}]},{\"key\":\"year\",\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"}]},{\"key\":\"by\",\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"2\":[{\"key\":\"tid\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"大陸劇\",\"v\":\"13\"},{\"n\":\"港劇\",\"v\":\"14\"},{\"n\":\"台劇\",\"v\":\"15\"},{\"n\":\"日劇\",\"v\":\"16\"},{\"n\":\"韓劇\",\"v\":\"23\"},{\"n\":\"美劇\",\"v\":\"24\"},{\"n\":\"海外劇\",\"v\":\"25\"}]},{\"key\":\"year\",\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"},{\"n\":\"2009\",\"v\":\"2009\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2007\",\"v\":\"2007\"},{\"n\":\"2006\",\"v\":\"2006\"},{\"n\":\"2005\",\"v\":\"2005\"},{\"n\":\"2004\",\"v\":\"2004\"}]},{\"key\":\"by\",\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"3\":[{\"key\":\"tid\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"港台綜藝\",\"v\":\"29\"},{\"n\":\"日韓綜藝\",\"v\":\"30\"},{\"n\":\"大陸綜藝\",\"v\":\"31\"},{\"n\":\"歐美綜藝\",\"v\":\"32\"}]},{\"key\":\"year\",\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"},{\"n\":\"2009\",\"v\":\"2009\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2007\",\"v\":\"2007\"},{\"n\":\"2006\",\"v\":\"2006\"},{\"n\":\"2005\",\"v\":\"2005\"},{\"n\":\"2004\",\"v\":\"2004\"}]},{\"key\":\"by\",\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"4\":[{\"key\":\"tid\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"港台動漫\",\"v\":\"33\"},{\"n\":\"日韓動漫\",\"v\":\"34\"},{\"n\":\"大陸動漫\",\"v\":\"35\"},{\"n\":\"歐美動漫\",\"v\":\"36\"},{\"n\":\"海外動漫\",\"v\":\"37\"}]},{\"key\":\"year\",\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"},{\"n\":\"2009\",\"v\":\"2009\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2007\",\"v\":\"2007\"},{\"n\":\"2006\",\"v\":\"2006\"},{\"n\":\"2005\",\"v\":\"2005\"},{\"n\":\"2004\",\"v\":\"2004\"}]},{\"key\":\"by\",\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}]}");
+            playerConfig = new JSONObject("{\"tkm3u8\":{\"sh\":\"✦剧嗨专线\",\"pu\":\"https://jx.huishij.com/yun/?url=\",\"sn\":1,\"or\":999},\"if101\":{\"sh\":\"✦蓝光超清\",\"pu\":\"\",\"sn\":0,\"or\":999},\"dbm3u8\":{\"sh\":\"北美高清①\",\"pu\":\"\",\"sn\":0,\"or\":999},\"dbyun\":{\"sh\":\"北美高清②\",\"pu\":\"\",\"sn\":0,\"or\":999},\"wjm3u8\":{\"sh\":\"北美高清③\",\"pu\":\"\",\"sn\":0,\"or\":999},\"kbm3u8\":{\"sh\":\"全球线路①\",\"pu\":\"\",\"sn\":0,\"or\":999},\"hnyun\":{\"sh\":\"全球线路②\",\"pu\":\"\",\"sn\":0,\"or\":999},\"hnm3u8\":{\"sh\":\"全球线路③\",\"pu\":\"\",\"sn\":0,\"or\":999},\"kbzy\":{\"sh\":\"全球线路④\",\"pu\":\"\",\"sn\":0,\"or\":999},\"fanqie\":{\"sh\":\"全球线路⑤\",\"pu\":\"\",\"sn\":0,\"or\":999},\"kuaiyun\":{\"sh\":\"快速线路\",\"pu\":\"https://qimihe.com/?url=\",\"sn\":1,\"or\":999},\"leyum3u8\":{\"sh\":\"午夜专线1\",\"pu\":\"\",\"sn\":0,\"or\":999},\"lym3u8\":{\"sh\":\"午夜专线2\",\"pu\":\"\",\"sn\":0,\"or\":999},\"dplayer\":{\"sh\":\"DPlayer-H5播放器\",\"pu\":\"\",\"sn\":0,\"or\":999},\"videojs\":{\"sh\":\"videojs-H5播放器\",\"pu\":\"\",\"sn\":0,\"or\":999},\"iva\":{\"sh\":\"iva-H5播放器\",\"pu\":\"\",\"sn\":0,\"or\":999},\"iframe\":{\"sh\":\"iframe外链数据\",\"pu\":\"\",\"sn\":0,\"or\":999},\"link\":{\"sh\":\"外链数据\",\"pu\":\"\",\"sn\":0,\"or\":999},\"swf\":{\"sh\":\"Flash文件\",\"pu\":\"\",\"sn\":0,\"or\":999},\"flv\":{\"sh\":\"Flv文件\",\"pu\":\"\",\"sn\":0,\"or\":999},\"bjyun\":{\"sh\":\"bjyun\",\"pu\":\"\",\"sn\":0,\"or\":999},\"bjm3u8\":{\"sh\":\"bjm3u8\",\"pu\":\"\",\"sn\":0,\"or\":999},\"wasu\":{\"sh\":\"华数直连\",\"pu\":\"\",\"sn\":0,\"or\":999},\"funshion\":{\"sh\":\"风行直连\",\"pu\":\"\",\"sn\":0,\"or\":999},\"pptv\":{\"sh\":\"PPTV直连\",\"pu\":\"https://jx.m3u8.tv/jiexi/?url=\",\"sn\":1,\"or\":999},\"letv\":{\"sh\":\"乐视直连\",\"pu\":\"https://jx.m3u8.tv/jiexi/?url=\",\"sn\":1,\"or\":999},\"mgtv\":{\"sh\":\"芒果直连\",\"pu\":\"https://jx.m3u8.tv/jiexi/?url=\",\"sn\":1,\"or\":999},\"youku\":{\"sh\":\"优酷直连\",\"pu\":\"https://jx.m3u8.tv/jiexi/?url=\",\"sn\":1,\"or\":999},\"qiyi\":{\"sh\":\"爱奇艺直连\",\"pu\":\"https://jx.m3u8.tv/jiexi/?url=\",\"sn\":1,\"or\":999},\"qq\":{\"sh\":\"腾讯直连\",\"pu\":\"https://jx.m3u8.tv/jiexi/?url=\",\"sn\":1,\"or\":999},\"m1905\":{\"sh\":\"M1905直连\",\"pu\":\"https://jx.m3u8.tv/jiexi/?url=\",\"sn\":1,\"or\":999},\"sohu\":{\"sh\":\"搜狐直连\",\"pu\":\"https://jx.m3u8.tv/jiexi/?url=\",\"sn\":1,\"or\":999}}");
+            filterConfig = new JSONObject("{\"20\":[{\"key\":\"0\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"20\"},{\"n\":\"动作片\",\"v\":\"24\"},{\"n\":\"喜剧片\",\"v\":\"25\"},{\"n\":\"愛情片\",\"v\":\"26\"},{\"n\":\"科幻片\",\"v\":\"27\"},{\"n\":\"恐怖片\",\"v\":\"28\"},{\"n\":\"劇情片\",\"v\":\"11\"},{\"n\":\"戰爭片\",\"v\":\"30\"},{\"n\":\"动画电影\",\"v\":\"33\"}]},{\"key\":1,\"name\":\"地区\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"大陆\",\"v\":\"大陆\"},{\"n\":\"香港\",\"v\":\"香港\"},{\"n\":\"台湾\",\"v\":\"台湾\"},{\"n\":\"美国\",\"v\":\"美国\"},{\"n\":\"法国\",\"v\":\"法国\"},{\"n\":\"英国\",\"v\":\"英国\"},{\"n\":\"日本\",\"v\":\"日本\"},{\"n\":\"韩国\",\"v\":\"韩国\"},{\"n\":\"德国\",\"v\":\"德国\"},{\"n\":\"泰国\",\"v\":\"泰国\"},{\"n\":\"印度\",\"v\":\"印度\"},{\"n\":\"意大利\",\"v\":\"意大利\"},{\"n\":\"西班牙\",\"v\":\"西班牙\"},{\"n\":\"加拿大\",\"v\":\"加拿大\"},{\"n\":\"其他\",\"v\":\"其他\"}]},{\"key\":11,\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"}]},{\"key\":2,\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"21\":[{\"key\":\"tid\",\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"国产剧\",\"v\":\"34\"},{\"n\":\"港剧\",\"v\":\"35\"},{\"n\":\"韩剧\",\"v\":\"37\"},{\"n\":\"欧美剧\",\"v\":\"36\"},{\"n\":\"日本剧\",\"v\":\"38\"},{\"n\":\"台湾剧\",\"v\":\"39\"},{\"n\":\"海外剧\",\"v\":\"40\"}]},{\"key\":11,\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"},{\"n\":\"2009\",\"v\":\"2009\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2007\",\"v\":\"2007\"},{\"n\":\"2006\",\"v\":\"2006\"},{\"n\":\"2005\",\"v\":\"2005\"},{\"n\":\"2004\",\"v\":\"2004\"}]},{\"key\":2,\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"22\":[{\"key\":0,\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"22\"},{\"n\":\"大陆综艺\",\"v\":\"41\"},{\"n\":\"港台综艺\",\"v\":\"42\"},{\"n\":\"日韩综艺\",\"v\":\"43\"},{\"n\":\"欧美综艺\",\"v\":\"44\"}]},{\"key\":11,\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"},{\"n\":\"2009\",\"v\":\"2009\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2007\",\"v\":\"2007\"},{\"n\":\"2006\",\"v\":\"2006\"},{\"n\":\"2005\",\"v\":\"2005\"},{\"n\":\"2004\",\"v\":\"2004\"}]},{\"key\":2,\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"23\":[{\"key\":0,\"name\":\"类型\",\"value\":[{\"n\":\"全部\",\"v\":\"23\"},{\"n\":\"国产动漫\",\"v\":\"45\"},{\"n\":\"日本动漫\",\"v\":\"46\"},{\"n\":\"欧美动漫\",\"v\":\"47\"}]},{\"key\":11,\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"},{\"n\":\"2009\",\"v\":\"2009\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2007\",\"v\":\"2007\"},{\"n\":\"2006\",\"v\":\"2006\"},{\"n\":\"2005\",\"v\":\"2005\"},{\"n\":\"2004\",\"v\":\"2004\"}]},{\"key\":2,\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}]}");
         } catch (JSONException e) {
             SpiderDebug.log(e);
         }
@@ -87,20 +82,20 @@ public class Djx extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            String url = siteUrl + '/';
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
+            SpiderUrl su = new SpiderUrl(siteUrl, getHeaders(siteUrl));
             SpiderReqResult srr = SpiderReq.get(su);
             Document doc = Jsoup.parse(srr.content);
-            Elements elements = doc.select("ul.nav-menu>li>a");
+            // 分类节点
+            Elements elements = doc.select("ul.nav-menu > li > a");
             JSONArray classes = new JSONArray();
-            ArrayList<String> allClass = new ArrayList<>();
             for (Element ele : elements) {
+                //分类名
                 String name = ele.text();
-                boolean show = !filter || (name.equals("电影") || name.equals("连续剧") || name.equals("综艺") || name.equals("动漫"));
-                if (allClass.contains(name))
-                    show = false;
+                boolean show = name.equals("电影") ||
+                        name.equals("电视剧") ||
+                        name.equals("综艺") ||
+                        name.equals("动漫") ;
                 if (show) {
-                    allClass.add(name);
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
                         continue;
@@ -119,15 +114,15 @@ public class Djx extends Spider {
             result.put("class", classes);
             try {
                 // 取首页推荐视频列表
-                Elements list = doc.select("div.col-lg-wide-75 > ul.myui-vodlist li div.myui-vodlist__box");
+                Element homeList = doc.select("ul.myui-vodlist").get(0);
+                Elements list = homeList.select("li > div > a");
                 JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.selectFirst(".title").text();
-                    String cover = vod.selectFirst(".myui-vodlist__thumb").attr("data-original");
+                    String title = vod.attr("title");
+                    String cover = vod.attr("data-original");
                     String remark = vod.selectFirst("span.pic-text").text();
-
-                    Matcher matcher = regexVid.matcher(vod.selectFirst(".myui-vodlist__thumb").attr("href"));
+                    Matcher matcher = regexVid.matcher(vod.attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -149,8 +144,7 @@ public class Djx extends Spider {
         return "";
     }
 
-    
-     /**
+    /**
      * 获取分类信息数据
      *
      * @param tid    分类id
@@ -162,42 +156,44 @@ public class Djx extends Spider {
     @Override
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         try {
-            String url = siteUrl + "/index.php/vod/show/id/";
-            if (extend != null && extend.size() > 0 && extend.containsKey("tid") && extend.get("tid").length() > 0) {
-                url += extend.get("tid");
-            } else {
-                url += tid;
-            }
+            String[] urlParams = new String[]{"", "", "", "", "", "", "", "", "", "", "", ""};
+            urlParams[0] = tid;
+            urlParams[8] = pg;
             if (extend != null && extend.size() > 0) {
                 for (Iterator<String> it = extend.keySet().iterator(); it.hasNext(); ) {
                     String key = it.next();
                     String value = extend.get(key);
-                    if (value.length() > 0) {
-                        url += "/" + key + "/" + URLEncoder.encode(value);
-                    }
+                    urlParams[Integer.parseInt(key)] = URLEncoder.encode(value);
                 }
             }
-            url += "/page/" + pg + ".html";
+            // 获取分类数据的url
+            String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + "/";
             SpiderUrl su = new SpiderUrl(url, getHeaders(url));
+            // 发起http请求
             SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            String html = srr.content;
+            Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
             int page = -1;
 
+            
             // 取页码相关信息
-            Elements pageInfo = doc.select(".myui-page li a");
+            Elements pageInfo = doc.select("ul.myui-page>li");
             if (pageInfo.size() == 0) {
                 page = Integer.parseInt(pg);
                 pageCount = page;
             } else {
                 for (int i = 0; i < pageInfo.size(); i++) {
-                    Element a = pageInfo.get(i);
+                    Element li = pageInfo.get(i);
+                    Element a = li.selectFirst("a");
+                    if (a == null)
+                        continue;
                     String name = a.text();
                     if (page == -1 && a.hasClass("btn-warm")) {
                         Matcher matcher = regexPage.matcher(a.attr("href"));
                         if (matcher.find()) {
-                            page = Integer.parseInt(matcher.group(1).trim());
+                            page = Integer.parseInt(matcher.group(1).split("-")[8]);
                         } else {
                             page = 0;
                         }
@@ -205,7 +201,7 @@ public class Djx extends Spider {
                     if (name.equals("尾页")) {
                         Matcher matcher = regexPage.matcher(a.attr("href"));
                         if (matcher.find()) {
-                            pageCount = Integer.parseInt(matcher.group(1).trim());
+                            pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
                         } else {
                             pageCount = 0;
                         }
@@ -215,16 +211,15 @@ public class Djx extends Spider {
             }
 
             JSONArray videos = new JSONArray();
-            if (!srr.content.contains("没有找到您想要的结果哦")) {
+            if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
-                Elements list = doc.select("ul.myui-vodlist li div.myui-vodlist__box");
+                Elements list = doc.select("ul.myui-vodlist > li > div > a");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
-                    String title = vod.selectFirst(".title").text();
-                    String cover = vod.selectFirst(".myui-vodlist__thumb").attr("data-original");
+                    String title = vod.attr("title");
+                    String cover = vod.attr("data-original");
                     String remark = vod.selectFirst("span.pic-text").text();
-
-                    Matcher matcher = regexVid.matcher(vod.selectFirst(".myui-vodlist__thumb").attr("href"));
+                    Matcher matcher = regexVid.matcher(vod.attr("href"));
                     if (!matcher.find())
                         continue;
                     String id = matcher.group(1);
@@ -249,7 +244,7 @@ public class Djx extends Spider {
         return "";
     }
 
-     /**
+    /**
      * 视频详情信息
      *
      * @param ids 视频id
@@ -259,7 +254,8 @@ public class Djx extends Spider {
     public String detailContent(List<String> ids) {
         try {
             // 视频详情url
-            String url = siteUrl + "/index.php/vod/detail/id/" + ids.get(0) + ".html";
+            String url = siteUrl + "/voddetail/" + ids.get(0)+ "/";
+            //System.out.println(url);
             SpiderUrl su = new SpiderUrl(url, getHeaders(url));
             SpiderReqResult srr = SpiderReq.get(su);
             Document doc = Jsoup.parse(srr.content);
@@ -267,10 +263,8 @@ public class Djx extends Spider {
             JSONObject vodList = new JSONObject();
 
             // 取基本数据
-            String vid = doc.selectFirst("span.mac_hits").attr("data-id");
-
-            String cover = doc.selectFirst("a.myui-vodlist__thumb img").attr("data-original");
-            String title = doc.selectFirst("div.myui-content__detail h1.title").text();
+            String cover = doc.selectFirst("div.myui-content__thumb > a > img").attr("src");
+            String title = doc.selectFirst("div.myui-content__thumb > a").attr("title");
             String desc = Jsoup.parse(doc.selectFirst("meta[name=description]").attr("content")).text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
             Elements span_text_muted = doc.select("div.myui-content__detail span.text-muted");
@@ -302,7 +296,7 @@ public class Djx extends Spider {
                 }
             }
 
-            vodList.put("vod_id", vid);
+            vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", title);
             vodList.put("vod_pic", cover);
             vodList.put("type_name", category);
@@ -312,7 +306,7 @@ public class Djx extends Spider {
             vodList.put("vod_actor", actor);
             vodList.put("vod_director", director);
             vodList.put("vod_content", desc);
-
+            //System.out.println(vodList.toString());
             Map<String, String> vod_play = new TreeMap<>(new Comparator<String>() {
                 @Override
                 public int compare(String o1, String o2) {
@@ -330,13 +324,15 @@ public class Djx extends Spider {
                     return 1;
                 }
             });
-                        
-            // 取播放列表数据
-            Elements sources = doc.select("div.myui-panel__head>ul").get(0).select("li");
-            Elements sourceList = doc.select("div.tab-content>div.tab-pane");
 
+            // 取播放列表数据
+            Elements sources = doc.select("ul.nav-btn > li > a");
+            //System.out.println(sources.size());
+            Elements sourceList = doc.select("div.tab-content > div");
+            //System.out.println(sourceList.size());
             for (int i = 0; i < sources.size(); i++) {
                 Element source = sources.get(i);
+                //System.out.println(sources.text().split("：")[0].split("』")[1]);
                 String sourceName = source.text();
                 boolean found = false;
                 for (Iterator<String> it = playerConfig.keys(); it.hasNext(); ) {
@@ -350,7 +346,8 @@ public class Djx extends Spider {
                 if (!found)
                     continue;
                 String playList = "";
-                Elements playListA = sourceList.get(i).select("ul>li>a");
+                Elements playListA = sourceList.get(i).select("ul > li > a");
+                //System.out.println(playListA.size());
                 List<String> vodItems = new ArrayList<>();
 
                 for (int j = 0; j < playListA.size(); j++) {
@@ -358,7 +355,7 @@ public class Djx extends Spider {
                     Matcher matcher = regexPlay.matcher(vod.attr("href"));
                     if (!matcher.find())
                         continue;
-                    String playURL = matcher.group(1) + "/sid/" + matcher.group(2) + "/nid/" + matcher.group(3);
+                    String playURL = matcher.group(1) + "-" + matcher.group(2) + "-" + matcher.group(3);
                     vodItems.add(vod.text() + "$" + playURL);
                 }
                 if (vodItems.size() > 0)
@@ -386,7 +383,8 @@ public class Djx extends Spider {
         return "";
     }
 
-   /**
+
+    /**
      * 获取视频播放信息
      *
      * @param flag     播放源
@@ -400,15 +398,15 @@ public class Djx extends Spider {
             //定义播放用的headers
             JSONObject headers = new JSONObject();
             //headers.put("Host", " cokemv.co");
-            headers.put("origin", " https://www.dijiaxia.com");
-            headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
-            headers.put("Accept", " */*");
-            headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-US;q=0.3,en;q=0.7");
-            headers.put("Accept-Encoding", " gzip, deflate");
+            //headers.put("origin", " https://juhi.cc");
+            //headers.put("User-Agent", " Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
+            //headers.put("Accept", " */*");
+            //headers.put("Accept-Language", " zh-CN,zh;q=0.9,en-US;q=0.3,en;q=0.7");
+            //headers.put("Accept-Encoding", " gzip, deflate, br");
 
 
             // 播放页 url
-            String url = siteUrl + "/index.php/vod/play/id/" + id + ".html";
+            String url = siteUrl + "/vodplay/" + id + "/";
             SpiderUrl su = new SpiderUrl(url, getHeaders(url));
             SpiderReqResult srr = SpiderReq.get(su);
             Document doc = Jsoup.parse(srr.content);
@@ -425,6 +423,16 @@ public class Djx extends Spider {
                         JSONObject pCfg = playerConfig.getJSONObject(player.getString("from"));
                         String videoUrl = player.getString("url");
                         String playUrl = pCfg.getString("pu");
+                        if (Misc.isVip(videoUrl)) { // 使用jx:1
+                            try {
+                                result.put("parse", 1);
+                                result.put("jx", "1");
+                                result.put("url", videoUrl);
+                                return result.toString();
+                            } catch (Exception e) {
+                            SpiderDebug.log(e);
+                            }
+                        }
                         result.put("parse", pCfg.getInt("sn"));
                         result.put("playUrl", playUrl);
                         result.put("url", videoUrl);
@@ -439,6 +447,8 @@ public class Djx extends Spider {
         }
         return "";
     }
+
+
 
 
     @Override

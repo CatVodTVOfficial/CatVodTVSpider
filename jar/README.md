@@ -7,6 +7,11 @@
 ```json
 
 "spider": "https://github.com/catvod/CatVodTVSpider/blob/master/jar/custom_spider.jar?raw=true",
+
+国内镜像
+
+"spider": "https://litecucumber.coding.net/p/cat/d/config/git/raw/master/custom_spider.txt",
+
 ......
 "sites": [
 ......
@@ -24,15 +29,6 @@
     "name": "嗯哩嗯哩",
     "type": 3,
     "api": "csp_Enlienli",
-    "searchable": 1,
-    "quickSearch": 0,
-    "filterable": 1
-  },
-  {
-    "key": "csp_EPang",
-    "name": "阿房影视(已废弃)",
-    "type": 3,
-    "api": "csp_EPang",
     "searchable": 1,
     "quickSearch": 0,
     "filterable": 1
@@ -83,37 +79,10 @@
     "filterable": 0
   },
   {
-    "key": "csp_Ubo",
-    "name": "U播影视(已废弃)",
-    "type": 3,
-    "api": "csp_Ubo",
-    "searchable": 1,
-    "quickSearch": 0,
-    "filterable": 1
-  },
-  {
     "key": "csp_Nekk",
     "name": "9E看看",
     "type": 3,
     "api": "csp_Nekk",
-    "searchable": 1,
-    "quickSearch": 0,
-    "filterable": 1
-  },
-  {
-    "key": "csp_EPangApp",
-    "name": "阿房影视App(已废弃)",
-    "type": 3,
-    "api": "csp_EPangApp",
-    "searchable": 1,
-    "quickSearch": 0,
-    "filterable": 1
-  },
-  {
-    "key": "csp_Djx",
-    "name": "瓜皮TV(爬虫)",
-    "type": 3,
-    "api": "csp_Djx",
     "searchable": 1,
     "quickSearch": 0,
     "filterable": 1
@@ -144,6 +113,15 @@
     "searchable": 1,
     "quickSearch": 0,
     "filterable": 1
+  },
+  {
+    "key": "csp_YydsAli1",
+    "name": "YYDS阿里(爬虫)",
+    "type": 3,
+    "api": "csp_YydsAli1",
+    "searchable": 1,
+    "quickSearch": 0,
+    "filterable": 0
   }
 ......
 ],

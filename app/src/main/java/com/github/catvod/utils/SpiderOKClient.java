@@ -1,4 +1,4 @@
-package com.github.catvod.okhttp;
+package com.github.catvod.utils;
 
 import java.util.List;
 import java.util.Map;

@@ -2,7 +2,6 @@ package com.github.catvod.spider;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Base64;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
@@ -18,7 +17,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,7 +30,7 @@ import java.util.regex.Pattern;
 
 /**
  * Demo for self study
- * <p> 
+ * <p>
  * Source from Author: CatVod
  */
 
@@ -42,7 +40,6 @@ public class Nfx extends Spider {
     private static final String siteHost = "nfxhd.com";
 
     protected JSONObject playerConfig;
-    protected JSONObject filterConfig;
 
     protected Pattern regexCategory = Pattern.compile("/vodtype/(\\w+)/");
     protected Pattern regexVid = Pattern.compile("/voddetail/(\\w+)/");
@@ -53,8 +50,7 @@ public class Nfx extends Spider {
     public void init(Context context) {
         super.init(context);
         try {
-            playerConfig = new JSONObject("{\"danmuku\":{\"sh\":\"海王播放器\",\"pu\":\"\",\"sn\":1,\"or\":999}}");
-            filterConfig = new JSONObject("{\"movie\":[{\"key\":1,\"name\":\"地区\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"中国大陆\",\"v\":\"中国大陆\"},{\"n\":\"中国香港\",\"v\":\"中国香港\"},{\"n\":\"中国台湾\",\"v\":\"中国台湾\"},{\"n\":\"美国\",\"v\":\"美国\"},{\"n\":\"法国\",\"v\":\"法国\"},{\"n\":\"英国\",\"v\":\"英国\"},{\"n\":\"日本\",\"v\":\"日本\"},{\"n\":\"韩国\",\"v\":\"韩国\"},{\"n\":\"德国\",\"v\":\"德国\"},{\"n\":\"泰国\",\"v\":\"泰国\"},{\"n\":\"印度\",\"v\":\"印度\"},{\"n\":\"意大利\",\"v\":\"意大利\"},{\"n\":\"西班牙\",\"v\":\"西班牙\"},{\"n\":\"加拿大\",\"v\":\"加拿大\"},{\"n\":\"其他\",\"v\":\"其他\"}]},{\"key\":11,\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"}]},{\"key\":2,\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"tvplay\":[{\"key\":11,\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"},{\"n\":\"2009\",\"v\":\"2009\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2007\",\"v\":\"2007\"},{\"n\":\"2006\",\"v\":\"2006\"},{\"n\":\"2005\",\"v\":\"2005\"},{\"n\":\"2004\",\"v\":\"2004\"}]},{\"key\":2,\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}],\"tvshow\":[{\"key\":11,\"name\":\"年份\",\"value\":[{\"n\":\"全部\",\"v\":\"\"},{\"n\":\"2021\",\"v\":\"2021\"},{\"n\":\"2020\",\"v\":\"2020\"},{\"n\":\"2019\",\"v\":\"2019\"},{\"n\":\"2018\",\"v\":\"2018\"},{\"n\":\"2017\",\"v\":\"2017\"},{\"n\":\"2016\",\"v\":\"2016\"},{\"n\":\"2015\",\"v\":\"2015\"},{\"n\":\"2014\",\"v\":\"2014\"},{\"n\":\"2013\",\"v\":\"2013\"},{\"n\":\"2012\",\"v\":\"2012\"},{\"n\":\"2011\",\"v\":\"2011\"},{\"n\":\"2010\",\"v\":\"2010\"},{\"n\":\"2009\",\"v\":\"2009\"},{\"n\":\"2008\",\"v\":\"2008\"},{\"n\":\"2007\",\"v\":\"2007\"},{\"n\":\"2006\",\"v\":\"2006\"},{\"n\":\"2005\",\"v\":\"2005\"},{\"n\":\"2004\",\"v\":\"2004\"}]},{\"key\":2,\"name\":\"排序\",\"value\":[{\"n\":\"时间\",\"v\":\"time\"},{\"n\":\"人气\",\"v\":\"hits\"},{\"n\":\"评分\",\"v\":\"score\"}]}]}");
+            playerConfig = new JSONObject("{\"adaplay\":{\"sh\":\"菜逼播放器\",\"sn\":\"1\",\"pu\":\"https://nfxhd.com/dp.php/?url=\",\"or\":999},\"xigua\":{\"sh\":\"手动点播放才能播放的播放器\",\"sn\":\"1\",\"pu\":\"https://nfxhd.com/dp.php/?url=\",\"or\":999},\"danmuku\":{\"sh\":\"海王播放器\",\"sn\":\"1\",\"pu\":\"\",\"or\":999},\"dplayer\":{\"sh\":\"冥王星播放器\",\"sn\":\"0\",\"pu\":\"\",\"or\":999},\"bdxm3u8\":{\"sh\":\"北斗星m3u8\",\"sn\":\"1\",\"pu\":\"https://player.bdxzym3u8.com/dplayer/?url=\",\"or\":999},\"bdxyun\":{\"sh\":\"北斗星云播放\",\"sn\":\"1\",\"pu\":\"\",\"or\":999},\"gangtiexia\":{\"sh\":\"土星播放器\",\"sn\":\"1\",\"pu\":\"https://wy.bigmao.top/api/ShowVideoWy/3bb24322f78b47dfb8723c13d46d45ee/\",\"or\":999},\"tt10\":{\"sh\":\"木星播放器\",\"sn\":\"1\",\"pu\":\"https://wy.bigmao.top/api/ShowVideoMu/3bb24322f78b47dfb8723c13d46d45ee/\",\"or\":999},\"docker\":{\"sh\":\"彗星播放器\",\"sn\":\"1\",\"pu\":\"https://wy.bigmao.top/api/ShowVideoDoc/3bb24322f78b47dfb8723c13d46d45ee/\",\"or\":999},\"qq\":{\"sh\":\"腾讯视频\",\"sn\":\"1\",\"pu\":\"\",\"or\":999},\"youku\":{\"sh\":\"优酷\",\"sn\":\"1\",\"pu\":\"\",\"or\":999},\"qiyi\":{\"sh\":\"爱奇艺\",\"sn\":\"1\",\"pu\":\"\",\"or\":999},\"mgtv\":{\"sh\":\"仅限APP播放\",\"sn\":\"1\",\"pu\":\"\",\"or\":999},\"m3u8\":{\"sh\":\"m3u8\",\"sn\":\"1\",\"pu\":\"\",\"or\":999},\"mx771\":{\"sh\":\"站长采集的播放器\",\"sn\":\"0\",\"pu\":\"\",\"or\":999},\"ppayun2\":{\"sh\":\"白鸟座播放器\",\"sn\":\"1\",\"pu\":\"https://wy.bigmao.top/api/ShowVideoMu/3bb24322f78b47dfb8723c13d46d45ee/\",\"or\":999},\"sohu\":{\"sh\":\"搜狐\",\"sn\":\"1\",\"pu\":\"\",\"or\":999},\"iframe\":{\"sh\":\"iframe外链数据\",\"sn\":\"0\",\"pu\":\"\",\"or\":999}}");
         } catch (JSONException e) {
             SpiderDebug.log(e);
         }
@@ -87,7 +83,7 @@ public class Nfx extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            String url = siteUrl ;
+            String url = siteUrl;
             SpiderUrl su = new SpiderUrl(url, getHeaders(url));
             SpiderReqResult srr = SpiderReq.get(su);
             Document doc = Jsoup.parse(srr.content);
@@ -96,7 +92,7 @@ public class Nfx extends Spider {
             ArrayList<String> allClass = new ArrayList<>();
             for (Element ele : elements) {
                 String name = ele.text();
-                boolean show = !filter || (name.equals("电影") || name.equals("美剧") || name.equals("日韩"));
+                boolean show = !filter || (name.equals("电影") || name.equals("美剧") || name.equals("日韩") || name.equals("动漫"));
                 if (allClass.contains(name))
                     show = false;
                 if (show) {
@@ -113,19 +109,16 @@ public class Nfx extends Spider {
                 }
             }
             JSONObject result = new JSONObject();
-            if (filter) {
-                result.put("filters", filterConfig);
-            }
             result.put("class", classes);
             try {
                 // 取首页推荐视频列表
-                Elements list = doc.select("div.myui-panel_bd>ul>li>div");
+                Elements list = doc.select("ul.myui-vodlist>li>div");
                 JSONArray videos = new JSONArray();
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
                     String title = vod.selectFirst(".title").text();
                     String cover = vod.selectFirst(".myui-vodlist__thumb").attr("data-original");
-                    String remark = vod.selectFirst("span.tag").text();
+                    String remark = vod.selectFirst("span.pic-text").text();
 
                     Matcher matcher = regexVid.matcher(vod.selectFirst(".myui-vodlist__thumb").attr("href"));
                     if (!matcher.find())
@@ -149,8 +142,8 @@ public class Nfx extends Spider {
         return "";
     }
 
-    
-     /**
+
+    /**
      * 获取分类信息数据
      *
      * @param tid    分类id
@@ -159,61 +152,51 @@ public class Nfx extends Spider {
      * @param extend 筛选参数{k:v, k1:v1}
      * @return
      */
-     @Override
-     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
-         try {
-             String[] urlParams = new String[]{"", "", "", "", "", "", "", "", "", "", "", ""};
-             urlParams[0] = tid;
-             urlParams[8] = pg;
-             if (extend != null && extend.size() > 0) {
-                 for (Iterator<String> it = extend.keySet().iterator(); it.hasNext(); ) {
-                     String key = it.next();
-                     String value = extend.get(key);
-                     urlParams[Integer.parseInt(key)] = URLEncoder.encode(value);
-                 }
-             }
-             // 获取分类数据的url
-             String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + "/";
-             SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-             // 发起http请求
-             SpiderReqResult srr = SpiderReq.get(su);
-             String html = srr.content;
-             Document doc = Jsoup.parse(html);
-             JSONObject result = new JSONObject();
-             int pageCount = 0;
-             int page = -1;
+    @Override
+    public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
+        try {
+            // 获取分类数据的url
+            String url = siteUrl + "/vodtype/" + tid + "-" + pg + "/";
+            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
+            // 发起http请求
+            SpiderReqResult srr = SpiderReq.get(su);
+            String html = srr.content;
+            Document doc = Jsoup.parse(html);
+            JSONObject result = new JSONObject();
+            int pageCount = 0;
+            int page = -1;
 
-             // 取页码相关信息
-             Elements pageInfo = doc.select("ul.myui-page>li");
-             if (pageInfo.size() == 0) {
-                 page = Integer.parseInt(pg);
-                 pageCount = page;
-             } else {
-                 for (int i = 0; i < pageInfo.size(); i++) {
-                     Element li = pageInfo.get(i);
-                     Element a = li.selectFirst("a");
-                     if (a == null)
-                         continue;
-                     String name = a.text();
-                     if (page == -1 && a.hasClass("btn-warm")) {
-                         Matcher matcher = regexPage.matcher(a.attr("href"));
-                         if (matcher.find()) {
-                             page = Integer.parseInt(matcher.group(1).split("-")[8]);
-                         } else {
-                             page = 0;
-                         }
-                     }
-                     if (name.equals("尾页")) {
-                         Matcher matcher = regexPage.matcher(a.attr("href"));
-                         if (matcher.find()) {
-                             pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
-                         } else {
-                             pageCount = 0;
-                         }
-                         break;
-                     }
-                 }
-             }
+            // 取页码相关信息
+            Elements pageInfo = doc.select("ul.myui-page>li");
+            if (pageInfo.size() == 0) {
+                page = Integer.parseInt(pg);
+                pageCount = page;
+            } else {
+                for (int i = 0; i < pageInfo.size(); i++) {
+                    Element li = pageInfo.get(i);
+                    Element a = li.selectFirst("a");
+                    if (a == null)
+                        continue;
+                    String name = a.text();
+                    if (page == -1 && a.hasClass("btn-warm")) {
+                        Matcher matcher = regexPage.matcher(a.attr("href"));
+                        if (matcher.find()) {
+                            page = Integer.parseInt(matcher.group(1).split("-")[8]);
+                        } else {
+                            page = 0;
+                        }
+                    }
+                    if (name.equals("尾页")) {
+                        Matcher matcher = regexPage.matcher(a.attr("href"));
+                        if (matcher.find()) {
+                            pageCount = Integer.parseInt(matcher.group(1).split("-")[8]);
+                        } else {
+                            pageCount = 0;
+                        }
+                        break;
+                    }
+                }
+            }
 
 
             JSONArray videos = new JSONArray();
@@ -224,7 +207,7 @@ public class Nfx extends Spider {
                     Element vod = list.get(i);
                     String title = vod.selectFirst(".title").text();
                     String cover = vod.selectFirst(".myui-vodlist__thumb").attr("data-original");
-                    String remark = vod.selectFirst("span.tag").text();
+                    String remark = vod.selectFirst("span.pic-text").text();
 
                     Matcher matcher = regexVid.matcher(vod.selectFirst(".myui-vodlist__thumb").attr("href"));
                     if (!matcher.find())
@@ -251,7 +234,7 @@ public class Nfx extends Spider {
         return "";
     }
 
-     /**
+    /**
      * 视频详情信息
      *
      * @param ids 视频id
@@ -331,7 +314,7 @@ public class Nfx extends Spider {
                     return 1;
                 }
             });
-                        
+
             // 取播放列表数据
             Elements sources = doc.select("div.myui-panel__head").get(1).select("h3");
             Elements sourceList = doc.select("ul.myui-content__list");
@@ -387,7 +370,7 @@ public class Nfx extends Spider {
         return "";
     }
 
-   /**
+    /**
      * 获取视频播放信息
      *
      * @param flag     播放源

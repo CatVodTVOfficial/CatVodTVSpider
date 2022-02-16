@@ -4,6 +4,7 @@ import com.github.catvod.crawler.SpiderDebug;
 import com.github.catvod.crawler.SpiderReq;
 import com.github.catvod.crawler.SpiderReqResult;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -11,13 +12,20 @@ import java.util.List;
 
 public class XPathEgg extends XPath {
 
+    String tk = "";
+
     @Override
     protected void loadRuleExt(String json) {
-        super.loadRuleExt(json);
+        try {
+            JSONObject jsonObj = new JSONObject(json);
+            tk = jsonObj.optString("decodeTk").trim();
+        } catch (JSONException e) {
+            SpiderDebug.log(e);
+        }
     }
 
     @Override
-    protected String categoryUrl(String tid, String pg) {
+    protected String categoryUrl(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         if (Integer.parseInt(pg) <= 1) {
             return rule.getCateUrl().replace("{cateId}", tid);
         }
@@ -42,7 +50,7 @@ public class XPathEgg extends XPath {
             HashMap<String, String> json = new HashMap<>();
             json.put("infoid", infoid);
             json.put("link5", link5);
-            json.put("t", "cucumber");
+            json.put("t", tk);
             // Thanks 猫大
             SpiderReqResult srr = SpiderReq.postJson("https://cat.idontcare.top/ssr/dandan", json, new HashMap<>());
             JSONObject obj = new JSONObject(srr.content);

@@ -6,6 +6,7 @@ import android.util.Base64;
 
 import com.github.catvod.crawler.SpiderDebug;
 import com.github.catvod.crawler.SpiderReqResult;
+import com.github.catvod.utils.Misc;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -116,6 +117,7 @@ public class XPathMac extends XPath {
         return result;
     }
 
+
     @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
         fetchRule();
@@ -153,19 +155,27 @@ public class XPathMac extends XPath {
             }
         }
         if (videoUrl != null) {
-            // 是否使用应用内解析列表解析官源
-            if (vipFlags.contains(flag)) {
-                if (decodeVipFlag) {
-                    try {
-                        JSONObject result = new JSONObject();
-                        result.put("parse", 1);
-                        result.put("playUrl", "");
-                        result.put("url", videoUrl);
-                        result.put("header", "");
-                        return result.toString();
-                    } catch (Exception e) {
-                        SpiderDebug.log(e);
-                    }
+            // 适配2.0.6的调用应用内解析列表的支持, 需要配合直连分析和匹配官源解析一起使用，参考cjt影视和极品直连
+            if (decodeVipFlag && Misc.isVip(videoUrl)) { // 使用jx:1
+                try {
+                    JSONObject result = new JSONObject();
+                    result.put("parse", 1);
+                    result.put("jx", "1");
+                    result.put("url", videoUrl);
+                    return result.toString();
+                } catch (Exception e) {
+                    SpiderDebug.log(e);
+                }
+            } else if (decodeVipFlag && vipFlags.contains(flag)) { // 是否使用应用内解析列表解析官源
+                try {
+                    JSONObject result = new JSONObject();
+                    result.put("parse", 1);
+                    result.put("playUrl", "");
+                    result.put("url", videoUrl);
+                    result.put("header", "");
+                    return result.toString();
+                } catch (Exception e) {
+                    SpiderDebug.log(e);
                 }
             }
             // 如果是视频直连 直接返回免解
