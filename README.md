@@ -82,6 +82,7 @@
 <summary>配置代码示例 点我展开</summary>
 
 ```json
+{"key":"csp_appysv2_tkys", "name":"天空影视(M2)", "type":3, "api":"csp_AppYsV2","searchable":1,"quickSearch":0,"filterable":1,"ext":"星空影视###https://litecucumber.coding.net/p/cat/d/config/git/raw/master/appysv2.json"},
 {"key":"csp_appys_南府追剧", "name":"南府追剧(M)", "type":3, "api":"csp_AppYs","searchable":1,"quickSearch":0,"filterable":1,"ext":"http://iapp.nfuxs.club/dnmb.php/v1.vod"},
 {"key":"csp_appys_HG影视", "name":"HG影视(M)", "type":3, "api":"csp_AppYs","searchable":1,"quickSearch":0,"filterable":1,"ext":"http://hgyx.vip/api.php/v1.vod"},
 {"key":"csp_appys_瑞丰资源", "name":"瑞丰资源(M)", "type":3, "api":"csp_AppYs","searchable":1,"quickSearch":0,"filterable":1,"ext":"https://ts.yjhan.com:4433/ruifenglb_api.php/v1.vod"},
