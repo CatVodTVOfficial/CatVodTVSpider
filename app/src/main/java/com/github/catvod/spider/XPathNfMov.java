@@ -1,11 +1,12 @@
 package com.github.catvod.spider;
 
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class XPathNfMov extends XPath {
 
@@ -20,17 +21,16 @@ public class XPathNfMov extends XPath {
     }
 
     @Override
-    protected SpiderReqResult fetch(String webUrl) {
+    protected String fetch(String webUrl) {
         SpiderDebug.log(webUrl);
-        SpiderUrl su = new SpiderUrl(webUrl, getHeaders(webUrl));
-        SpiderReqResult srr = SpiderReq.get(su);
-        if (srr.content.contains("http-equiv=\"refresh\"")) {
-            if (srr.headers.containsKey("set-cookie")) {
-                cookies = srr.headers.get("set-cookie").get(0);
+        Map<String, List<String>> respHeaders = new TreeMap<>();
+        String content = OkHttpUtil.string(webUrl, getHeaders(webUrl), respHeaders);
+        if (content.contains("http-equiv=\"refresh\"")) {
+            if (respHeaders.containsKey("set-cookie")) {
+                cookies = respHeaders.get("set-cookie").get(0);
             }
-            su = new SpiderUrl(webUrl, getHeaders(webUrl));
-            srr = SpiderReq.get(su);
+            content = OkHttpUtil.string(webUrl, getHeaders(webUrl));
         }
-        return srr;
+        return content;
     }
 }

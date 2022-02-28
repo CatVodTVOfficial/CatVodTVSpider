@@ -5,11 +5,8 @@ import android.text.TextUtils;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
 import com.github.catvod.utils.Misc;
-import com.github.catvod.utils.SpiderOKClient;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,6 +17,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,7 +44,7 @@ public class AppYs extends Spider {
             JSONArray jsonArray = null;
             if (!url.isEmpty()) {
                 SpiderDebug.log(url);
-                String json = SpiderReq.get(new SpiderUrl(url, getHeaders(url))).content;
+                String json = OkHttpUtil.string(url, getHeaders(url));
                 JSONObject obj = new JSONObject(json);
                 if (obj.has("list") && obj.get("list") instanceof JSONArray) {
                     jsonArray = obj.getJSONArray("list");
@@ -155,7 +154,7 @@ public class AppYs extends Spider {
                 isTV = true;
             }
             SpiderDebug.log(url);
-            String json = SpiderReq.get(new SpiderUrl(url, getHeaders(url))).content;
+            String json = OkHttpUtil.string(url, getHeaders(url));
             JSONObject obj = new JSONObject(json);
             JSONArray videos = new JSONArray();
             if (isTV) {
@@ -213,7 +212,7 @@ public class AppYs extends Spider {
             url = url.replace("筛选year", (extend != null && extend.containsKey("year")) ? extend.get("year") : "");
             url = url.replace("排序", (extend != null && extend.containsKey("排序")) ? extend.get("排序") : "");
             SpiderDebug.log(url);
-            String json = SpiderReq.get(new SpiderUrl(url, getHeaders(url))).content;
+            String json = OkHttpUtil.string(url, getHeaders(url));
             JSONObject obj = new JSONObject(json);
             int totalPg = Integer.MAX_VALUE;
             try {
@@ -280,7 +279,7 @@ public class AppYs extends Spider {
             String apiUrl = extString;
             String url = getPlayUrlPrefix(apiUrl) + ids.get(0);
             SpiderDebug.log(url);
-            String json = SpiderReq.get(new SpiderUrl(url, getHeaders(url))).content;
+            String json = OkHttpUtil.string(url, getHeaders(url));
             JSONObject obj = new JSONObject(json);
             JSONObject result = new JSONObject();
             JSONObject vod = new JSONObject();
@@ -300,7 +299,7 @@ public class AppYs extends Spider {
         try {
             String apiUrl = extString;
             String url = getSearchUrl(apiUrl, URLEncoder.encode(key));
-            String json = SpiderReq.get(new SpiderUrl(url, getHeaders(url))).content;
+            String json = OkHttpUtil.string(url, getHeaders(url));
             JSONObject obj = new JSONObject(json);
             JSONArray jsonArray = null;
             JSONArray videos = new JSONArray();
@@ -902,23 +901,23 @@ public class AppYs extends Spider {
             String playurl = uu.split("wd=")[1];
             if (playurl.contains("duoduozy.com") || playurl.contains("suoyo.cc")) {
                 String uuu = "https://www.6080kan.cc/app.php?url=" + playurl;
-                SpiderReqResult resp = SpiderReq.get(new SpiderUrl(uuu, null));
-                JSONObject obj = new JSONObject(resp.content);
+                String content = OkHttpUtil.string(uuu, null);
+                JSONObject obj = new JSONObject(content);
                 result.put("parse", 0);
                 result.put("playUrl", "");
                 result.put("url", obj.getString("url"));
                 result.put("header", "{\"User-Agent\":\" Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.81 Safari/537.36 SE 2.X MetaSr 1.0\",\"referer\":\" https://player.duoduozy.com\",\"origin\":\" https://dp.duoduozy.com\",\"Host\":\" cache.m3u8.suoyo.cc\"}");
             } else if (playurl.contains("xfy")) {
-                SpiderReqResult resp = SpiderReq.get(new SpiderUrl(playurl, null));
-                JSONObject obj = new JSONObject(resp.content);
+                String content = OkHttpUtil.string(playurl, null);
+                JSONObject obj = new JSONObject(content);
                 result.put("parse", 0);
                 result.put("playUrl", "");
                 result.put("url", obj.getString("url"));
                 result.put("header", "{\"referer\":\" appguapi.lihaoyun.top:11543\",\"User-Agent\":\" Dart/2.14 (dart:io)\"}}");
             } else if (playurl.contains("api.iopenyun.com:88")) {
                 if (playurl.contains("html")) {
-                    SpiderReqResult resp = SpiderReq.get(new SpiderUrl("https://api.m3u8.tv:5678/home/api?type=ys&uid=233711&key=dgilouvFKNRSWX2467&url=" + playurl.split("=")[1], null));
-                    JSONObject obj = new JSONObject(resp.content);
+                    String content = OkHttpUtil.string("https://api.m3u8.tv:5678/home/api?type=ys&uid=233711&key=dgilouvFKNRSWX2467&url=" + playurl.split("=")[1], null);
+                    JSONObject obj = new JSONObject(content);
                     String ppurl = obj.getString("url");
                     result.put("parse", 0);
                     result.put("playUrl", "");
@@ -937,8 +936,8 @@ public class AppYs extends Spider {
                 result.put("header", "{\"User-Agent\":\" Lavf/58.12.100\",\"Referer\":\" wkfile.com\"}");
             } else if (!playurl.contains("=") && playurl.indexOf(".m3u8") > 15 || playurl.indexOf(".mp4") > 15 || playurl.contains("/obj/tos")) {
                 if (playurl.contains("hsl.ysgc.xyz")) {
-                    SpiderReqResult resp = SpiderReq.get(new SpiderUrl("https://jx.ysgc.xyz/?url=" + playurl, null));
-                    JSONObject obj = new JSONObject(resp.content);
+                    String content = OkHttpUtil.string("https://jx.ysgc.xyz/?url=" + playurl, null);
+                    JSONObject obj = new JSONObject(content);
                     String ppurl = obj.getString("url");
                     result.put("parse", 0);
                     result.put("playUrl", "");
@@ -964,8 +963,9 @@ public class AppYs extends Spider {
             } else if (playurl.contains("=")) {
                 HashMap<String, String> headers = new HashMap();
                 headers.put("User-Agent", "Mozilla/5.0 Android");
-                SpiderReqResult resp = SpiderReq.get(SpiderOKClient.noRedirectClient(), new SpiderUrl(playurl, headers));
-                String redLoc = SpiderOKClient.getRedirectLocation(resp.headers);
+                Map<String, List<String>> respHeaders = new TreeMap<>();
+                String content = OkHttpUtil.stringNoRedirect(playurl, headers, respHeaders);
+                String redLoc = OkHttpUtil.getRedirectLocation(respHeaders);
                 if (redLoc != null) {
                     String finalurl = "";
                     while (redLoc != null) {
@@ -974,18 +974,18 @@ public class AppYs extends Spider {
                             break;
                         } else {
                             headers.put("User-Agent", "Mozilla/5.0 Android");
-                            resp = SpiderReq.get(SpiderOKClient.noRedirectClient(), new SpiderUrl(finalurl, headers));
-                            redLoc = SpiderOKClient.getRedirectLocation(resp.headers);
+                            content = OkHttpUtil.stringNoRedirect(finalurl, headers, respHeaders);
+                            redLoc = OkHttpUtil.getRedirectLocation(respHeaders);
                         }
                     }
                     String realurl = finalurl;
                     if (realurl.contains("=http") || realurl.contains("url=")) {
-                        if (resp.content.contains("<html")) {
+                        if (content.contains("<html")) {
                             result.put("parse", 1);
                             result.put("playUrl", "");
                             result.put("url", realurl);
                         } else {
-                            JSONObject obj = new JSONObject(resp.content);
+                            JSONObject obj = new JSONObject(content);
                             String ppurl = obj.getString("url");
                             result.put("parse", 0);
                             result.put("playUrl", "");
@@ -1008,10 +1008,10 @@ public class AppYs extends Spider {
                         }
                     }
                 } else {
-                    if (resp.content.contains("<html")) {
+                    if (content.contains("<html")) {
                         boolean sniffer = false;
                         for (Pattern p : htmlVideoKeyMatch) {
-                            if (p.matcher(resp.content).find()) {
+                            if (p.matcher(content).find()) {
                                 sniffer = true;
                                 break;
                             }
@@ -1034,8 +1034,8 @@ public class AppYs extends Spider {
                                 String id = playurl.split("url=")[1];
 								/*
                                 String uuu = "https://vip.gaotian.love/api/?key=sRy0QAq8hqXRlrEtrq&url=" + id;
-                                resp = SpiderReq.get(new SpiderUrl(uuu, null));
-                                JSONObject obj = new JSONObject(resp.content);
+                                content = OkHttpUtil.string(uuu, null);
+                                JSONObject obj = new JSONObject(content);
                                 String realurl = obj.optString("url", "");
                                 if (realurl.isEmpty())
                                     realurl = obj.optString("msg", "");
@@ -1051,7 +1051,7 @@ public class AppYs extends Spider {
                     } else {
                         String jsonUrl = "";
                         try {
-                            JSONObject obj = new JSONObject(resp.content);
+                            JSONObject obj = new JSONObject(content);
                             jsonUrl = obj.optString("url");
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -1085,8 +1085,8 @@ public class AppYs extends Spider {
                             String id = playurl.split("url=")[1];
 							/*
                             String uuu = "https://vip.gaotian.love/api/?key=sRy0QAq8hqXRlrEtrq&url=" + id;
-                            resp = SpiderReq.get(new SpiderUrl(uuu, null));
-                            JSONObject obj = new JSONObject(resp.content);
+                            content = OkHttpUtil.string(uuu, null);
+                            JSONObject obj = new JSONObject(content);
                             String realurl = obj.optString("url", "");
                             if (realurl.isEmpty())
                                 realurl = obj.optString("msg", "");

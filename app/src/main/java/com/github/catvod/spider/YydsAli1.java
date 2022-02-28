@@ -5,10 +5,8 @@ import android.text.TextUtils;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
-import com.github.catvod.utils.SpiderOKClient;
+import com.github.catvod.utils.okhttp.OKCallBack;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,11 +17,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
+import okhttp3.Call;
 
 public class YydsAli1 extends Spider {
     private static final String siteUrl = "https://cmn.yyds.fans";
@@ -45,9 +43,8 @@ public class YydsAli1 extends Spider {
     public String homeContent(boolean filter) {
         try {
             String url = siteUrl + "/api/categories";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONObject jsonObject = new JSONObject(srr.content);
+            String content = OkHttpUtil.string(url, getHeaders(url));
+            JSONObject jsonObject = new JSONObject(content);
             JSONArray jsonArray = jsonObject.getJSONArray("data");
             JSONArray classes = new JSONArray();
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -77,26 +74,37 @@ public class YydsAli1 extends Spider {
             JSONArray videos = new JSONArray();
             try {
                 String url = siteUrl + "/api/posts";
-                HashMap<String, String> json = new HashMap<>();
+                JSONObject json = new JSONObject();
                 json.put("category_id", "0");
                 json.put("skip", "0");
                 json.put("limit", "30");
                 json.put("keyword", "");
-                SpiderReqResult srr = SpiderReq.postJson(url, json, getHeaders(url));
-                JSONObject jsonObject = new JSONObject(srr.content);
-                JSONArray jsonArray = jsonObject.getJSONArray("data");
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject vObj = jsonArray.getJSONObject(i);
-                    JSONObject v = new JSONObject();
-                    v.put("vod_id", vObj.getString("id"));
-                    v.put("vod_name", vObj.getString("title"));
-                    v.put("vod_pic", vObj.optString("cover"));
-                    String mark = vObj.optString("subtitle");
-                    if (mark.equals("null"))
-                        mark = "";
-                    v.put("vod_remarks", mark);
-                    videos.put(v);
-                }
+                OkHttpUtil.postJson(OkHttpUtil.defaultClient(), url, json.toString(), getHeaders(url), new OKCallBack.OKCallBackString() {
+                    @Override
+                    public void onFailure(Call call, Exception e) {
+                    }
+
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            JSONArray jsonArray = jsonObject.getJSONArray("data");
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject vObj = jsonArray.getJSONObject(i);
+                                JSONObject v = new JSONObject();
+                                v.put("vod_id", vObj.getString("id"));
+                                v.put("vod_name", vObj.getString("title"));
+                                v.put("vod_pic", vObj.optString("cover"));
+                                String mark = vObj.optString("subtitle");
+                                if (mark.equals("null"))
+                                    mark = "";
+                                v.put("vod_remarks", mark);
+                                videos.put(v);
+                            }
+                        } catch (JSONException e) {
+                        }
+                    }
+                });
             } catch (Exception e) {
 
             }
@@ -118,27 +126,38 @@ public class YydsAli1 extends Spider {
                 page = 1;
             }
             String url = siteUrl + "/api/posts";
-            HashMap<String, String> json = new HashMap<>();
+            JSONObject json = new JSONObject();
             json.put("category_id", tid);
             json.put("skip", ((page - 1) * limit) + "");
             json.put("limit", limit + "");
             json.put("keyword", "");
-            SpiderReqResult srr = SpiderReq.postJson(url, json, getHeaders(url));
-            JSONObject jsonObject = new JSONObject(srr.content);
-            JSONArray jsonArray = jsonObject.getJSONArray("data");
             JSONArray videos = new JSONArray();
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject vObj = jsonArray.getJSONObject(i);
-                JSONObject v = new JSONObject();
-                v.put("vod_id", vObj.getString("id"));
-                v.put("vod_name", vObj.getString("title"));
-                v.put("vod_pic", vObj.optString("cover"));
-                String mark = vObj.optString("subtitle");
-                if (mark.equals("null"))
-                    mark = "";
-                v.put("vod_remarks", mark);
-                videos.put(v);
-            }
+            OkHttpUtil.postJson(OkHttpUtil.defaultClient(), url, json.toString(), getHeaders(url), new OKCallBack.OKCallBackString() {
+                @Override
+                public void onFailure(Call call, Exception e) {
+                }
+
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        JSONArray jsonArray = jsonObject.getJSONArray("data");
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject vObj = jsonArray.getJSONObject(i);
+                            JSONObject v = new JSONObject();
+                            v.put("vod_id", vObj.getString("id"));
+                            v.put("vod_name", vObj.getString("title"));
+                            v.put("vod_pic", vObj.optString("cover"));
+                            String mark = vObj.optString("subtitle");
+                            if (mark.equals("null"))
+                                mark = "";
+                            v.put("vod_remarks", mark);
+                            videos.put(v);
+                        }
+                    } catch (JSONException e) {
+                    }
+                }
+            });
             JSONObject result = new JSONObject();
             result.put("page", page);
             int pageCount = videos.length() == limit ? page + 1 : page;
@@ -160,48 +179,59 @@ public class YydsAli1 extends Spider {
     public String detailContent(List<String> ids) {
         try {
             String url = siteUrl + "/api/post-info";
-            HashMap<String, String> json = new HashMap<>();
+            JSONObject json = new JSONObject();
             json.put("id", ids.get(0));
-            SpiderReqResult srr = SpiderReq.postJson(url, json, getHeaders(url));
-            JSONObject dataObject = new JSONObject(srr.content);
-            JSONObject vObj = dataObject.getJSONObject("data");
+            JSONObject vodAtom = new JSONObject();
+            OkHttpUtil.postJson(OkHttpUtil.defaultClient(), url, json.toString(), getHeaders(url), new OKCallBack.OKCallBackString() {
+                @Override
+                public void onFailure(Call call, Exception e) {
+                }
+
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        JSONObject dataObject = new JSONObject(response);
+                        JSONObject vObj = dataObject.getJSONObject("data");
+
+                        vodAtom.put("vod_id", vObj.getString("id"));
+                        vodAtom.put("vod_name", vObj.getString("title"));
+                        vodAtom.put("vod_pic", vObj.getString("cover"));
+                        vodAtom.put("type_name", "");
+                        vodAtom.put("vod_year", vObj.getString("year"));
+                        vodAtom.put("vod_area", vObj.getString("region"));
+                        String mark = vObj.optString("subtitle");
+                        if (mark.equals("null"))
+                            mark = "";
+                        vodAtom.put("vod_remarks", mark);
+                        vodAtom.put("vod_actor", vObj.getString("actors"));
+                        vodAtom.put("vod_director", vObj.getString("director"));
+                        String desc = vObj.optString("desc");
+                        if (desc.equals("null"))
+                            desc = "";
+                        vodAtom.put("vod_content", desc);
+
+                        Map<String, String> vod_play = new LinkedHashMap<>();
+                        JSONArray jsonArray = vObj.getJSONArray("links");
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject obj = jsonArray.getJSONObject(i);
+                            String link = obj.optString("link", "");
+                            updatePlaylist(link, vod_play);
+                        }
+                        if (vod_play.size() == 0 && vObj.optString("content").length() > 0) {
+                            updatePlaylist(vObj.optString("content"), vod_play);
+                        }
+                        if (vod_play.size() > 0) {
+                            String vod_play_from = TextUtils.join("$$$", vod_play.keySet());
+                            String vod_play_url = TextUtils.join("$$$", vod_play.values());
+                            vodAtom.put("vod_play_from", vod_play_from);
+                            vodAtom.put("vod_play_url", vod_play_url);
+                        }
+                    } catch (JSONException e) {
+                    }
+                }
+            });
             JSONObject result = new JSONObject();
             JSONArray list = new JSONArray();
-            JSONObject vodAtom = new JSONObject();
-            vodAtom.put("vod_id", vObj.getString("id"));
-            vodAtom.put("vod_name", vObj.getString("title"));
-            vodAtom.put("vod_pic", vObj.getString("cover"));
-            vodAtom.put("type_name", "");
-            vodAtom.put("vod_year", vObj.getString("year"));
-            vodAtom.put("vod_area", vObj.getString("region"));
-            String mark = vObj.optString("subtitle");
-            if (mark.equals("null"))
-                mark = "";
-            vodAtom.put("vod_remarks", mark);
-            vodAtom.put("vod_actor", vObj.getString("actors"));
-            vodAtom.put("vod_director", vObj.getString("director"));
-            String desc = vObj.optString("desc");
-            if (desc.equals("null"))
-                desc = "";
-            vodAtom.put("vod_content", desc);
-
-            Map<String, String> vod_play = new LinkedHashMap<>();
-            JSONArray jsonArray = vObj.getJSONArray("links");
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject obj = jsonArray.getJSONObject(i);
-                String link = obj.optString("link", "");
-                updatePlaylist(link, vod_play);
-            }
-            if (vod_play.size() == 0 && vObj.optString("content").length() > 0) {
-                updatePlaylist(vObj.optString("content"), vod_play);
-            }
-            accessTk = "";
-            if (vod_play.size() > 0) {
-                String vod_play_from = TextUtils.join("$$$", vod_play.keySet());
-                String vod_play_url = TextUtils.join("$$$", vod_play.values());
-                vodAtom.put("vod_play_from", vod_play_from);
-                vodAtom.put("vod_play_url", vod_play_url);
-            }
             list.put(vodAtom);
             result.put("list", list);
             return result.toString();
@@ -220,8 +250,9 @@ public class YydsAli1 extends Spider {
             matcher = aliyunShort.matcher(link);
             if (matcher.find()) {
                 shareId = matcher.group(1);
-                SpiderReqResult resp = SpiderReq.get(SpiderOKClient.noRedirectClient(), new SpiderUrl("https://alywp.net/" + shareId, null));
-                shareId = SpiderOKClient.getRedirectLocation(resp.headers);
+                Map<String, List<String>> respHeaders = new TreeMap<>();
+                OkHttpUtil.stringNoRedirect("https://alywp.net/" + shareId, null, respHeaders);
+                shareId = OkHttpUtil.getRedirectLocation(respHeaders);
                 if (shareId != null) {
                     matcher = aliyun.matcher(shareId);
                     if (matcher.find()) {
@@ -253,8 +284,39 @@ public class YydsAli1 extends Spider {
                 HashMap<String, String> headers = new HashMap<>();
                 headers.put("x-share-token", shareTk);
                 headers.put("authorization", accessTk);
-                SpiderReqResult srr = SpiderReq.postBody("https://api.aliyundrive.com/v2/file/get_share_link_video_preview_play_info", RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString()), headers);
-                JSONArray playList = new JSONObject(srr.content).getJSONObject("video_preview_play_info").getJSONArray("live_transcoding_task_list");
+                OKCallBack.OKCallBackString callback = new OKCallBack.OKCallBackString() {
+                    @Override
+                    public void onFailure(Call call, Exception e) {
+                    }
+
+                    @Override
+                    public void onResponse(String response) {
+                        String videoUrl = "";
+                        try {
+                            JSONArray playList = new JSONObject(response).getJSONObject("video_preview_play_info").getJSONArray("live_transcoding_task_list");
+                            String[] orders = new String[]{"FHD", "HD", "SD"};
+                            for (String or : orders) {
+                                for (int i = 0; i < playList.length(); i++) {
+                                    JSONObject obj = playList.getJSONObject(i);
+                                    if (obj.optString("template_id").equals(or)) {
+                                        videoUrl = obj.getString("url");
+                                        break;
+                                    }
+                                }
+                                if (!videoUrl.isEmpty())
+                                    break;
+                            }
+                            if (videoUrl.isEmpty() && playList.length() > 0) {
+                                videoUrl = playList.getJSONObject(0).getString("url");
+                            }
+                        } catch (JSONException e) {
+                        } finally {
+                            setResult(videoUrl);
+                        }
+                    }
+                };
+                OkHttpUtil.postJson(OkHttpUtil.defaultClient(), "https://api.aliyundrive.com/v2/file/get_share_link_video_preview_play_info", json.toString(), headers, callback);
+                JSONArray playList = new JSONObject(callback.getResult()).getJSONObject("video_preview_play_info").getJSONArray("live_transcoding_task_list");
                 String videoUrl = "";
                 String[] orders = new String[]{"FHD", "HD", "SD"};
                 for (String or : orders) {
@@ -295,23 +357,35 @@ public class YydsAli1 extends Spider {
             JSONArray videos = new JSONArray();
             try {
                 String url = siteUrl + "/api/posts";
-                HashMap<String, String> json = new HashMap<>();
+                JSONObject json = new JSONObject();
                 json.put("category_id", "-1");
                 json.put("skip", "0");
                 json.put("limit", "30");
                 json.put("keyword", key);
-                SpiderReqResult srr = SpiderReq.postJson(url, json, getHeaders(url));
-                JSONObject jsonObject = new JSONObject(srr.content);
-                JSONArray jsonArray = jsonObject.getJSONArray("data");
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject vObj = jsonArray.getJSONObject(i);
-                    JSONObject v = new JSONObject();
-                    v.put("vod_id", vObj.getString("id"));
-                    v.put("vod_name", vObj.getString("title"));
-                    v.put("vod_pic", vObj.getString("cover"));
-                    v.put("vod_remarks", vObj.getString("subtitle"));
-                    videos.put(v);
-                }
+                OkHttpUtil.postJson(OkHttpUtil.defaultClient(), url, json.toString(), getHeaders(url), new OKCallBack.OKCallBackString() {
+                    @Override
+                    public void onFailure(Call call, Exception e) {
+                    }
+
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            JSONArray jsonArray = jsonObject.getJSONArray("data");
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject vObj = jsonArray.getJSONObject(i);
+                                JSONObject v = new JSONObject();
+                                v.put("vod_id", vObj.getString("id"));
+                                v.put("vod_name", vObj.getString("title"));
+                                v.put("vod_pic", vObj.getString("cover"));
+                                v.put("vod_remarks", vObj.getString("subtitle"));
+                                videos.put(v);
+                            }
+                        } catch (JSONException e) {
+                        }
+                    }
+                });
+
             } catch (Exception e) {
 
             }
@@ -331,8 +405,7 @@ public class YydsAli1 extends Spider {
             try {
                 HashMap<String, String> headers = new HashMap<>();
                 headers.put("User-Agent", "okhttp/4.5.0");
-                SpiderReqResult srr = SpiderReq.get(new SpiderUrl("http://81.68.244.5/tv/alitk", headers));
-                aliTk = new JSONObject(srr.content).optString("alitk");
+                aliTk = new JSONObject(OkHttpUtil.string("http://81.68.244.5/tv/alitk", headers)).optString("alitk");
             } catch (JSONException e) {
                 SpiderDebug.log(e);
             }
@@ -345,11 +418,24 @@ public class YydsAli1 extends Spider {
         fetchAliTk();
         if (!aliTk.isEmpty() && accessTk.isEmpty()) {
             try {
-                HashMap<String, String> json = new HashMap<>();
+                JSONObject json = new JSONObject();
                 json.put("refresh_token", aliTk);
-                SpiderReqResult srr = SpiderReq.postJson("https://api.aliyundrive.com/token/refresh", json, new HashMap<>());
-                JSONObject obj = new JSONObject(srr.content);
-                accessTk = obj.getString("token_type") + " " + obj.getString("access_token");
+                OkHttpUtil.postJson(OkHttpUtil.defaultClient(), "https://api.aliyundrive.com/token/refresh", json.toString(), new OKCallBack.OKCallBackString() {
+                    @Override
+                    public void onFailure(Call call, Exception e) {
+
+                    }
+
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject obj = new JSONObject(response);
+                            accessTk = obj.getString("token_type") + " " + obj.getString("access_token");
+                        } catch (Exception e) {
+                            SpiderDebug.log(e);
+                        }
+                    }
+                });
             } catch (JSONException e) {
                 SpiderDebug.log(e);
             }
@@ -358,11 +444,22 @@ public class YydsAli1 extends Spider {
 
     private String getShareTk(String shareId, String sharePwd) {
         try {
-            HashMap<String, String> json = new HashMap<>();
+            JSONObject json = new JSONObject();
             json.put("share_id", shareId);
             json.put("share_pwd", "");
-            SpiderReqResult srr = SpiderReq.postJson("https://api.aliyundrive.com/v2/share_link/get_share_token", json, new HashMap<>());
-            return new JSONObject(srr.content).optString("share_token");
+            OKCallBack.OKCallBackString callback = new OKCallBack.OKCallBackString() {
+                @Override
+                public void onFailure(Call call, Exception e) {
+
+                }
+
+                @Override
+                public void onResponse(String response) {
+
+                }
+            };
+            OkHttpUtil.postJson(OkHttpUtil.defaultClient(), "https://api.aliyundrive.com/v2/share_link/get_share_token", json.toString(), callback);
+            return new JSONObject(callback.getResult()).optString("share_token");
         } catch (JSONException e) {
             SpiderDebug.log(e);
         }
@@ -384,8 +481,19 @@ public class YydsAli1 extends Spider {
             json.put("order_direction", "ASC");
             HashMap<String, String> headers = new HashMap<>();
             headers.put("x-share-token", shareTk);
-            SpiderReqResult srr = SpiderReq.postBody("https://api.aliyundrive.com/adrive/v3/file/list", RequestBody.create(MediaType.parse("application/json; charset=utf-8"), json.toString()), headers);
-            JSONArray rootList = new JSONObject(srr.content).optJSONArray("items");
+            OKCallBack.OKCallBackString callback = new OKCallBack.OKCallBackString() {
+                @Override
+                public void onFailure(Call call, Exception e) {
+
+                }
+
+                @Override
+                public void onResponse(String response) {
+
+                }
+            };
+            OkHttpUtil.postJson(OkHttpUtil.defaultClient(), "https://api.aliyundrive.com/adrive/v3/file/list", json.toString(), headers, callback);
+            JSONArray rootList = new JSONObject(callback.getResult()).optJSONArray("items");
             if (rootList != null && rootList.length() > 0) {
                 for (int i = 0; i < rootList.length(); i++) {
                     JSONObject item = rootList.getJSONObject(i);

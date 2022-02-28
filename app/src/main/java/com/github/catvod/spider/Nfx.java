@@ -5,9 +5,7 @@ import android.text.TextUtils;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,9 +82,7 @@ public class Nfx extends Spider {
     public String homeContent(boolean filter) {
         try {
             String url = siteUrl;
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements elements = doc.select("ul.nav-menu>li>a");
             JSONArray classes = new JSONArray();
             ArrayList<String> allClass = new ArrayList<>();
@@ -157,10 +153,7 @@ public class Nfx extends Spider {
         try {
             // 获取分类数据的url
             String url = siteUrl + "/vodtype/" + tid + "-" + pg + "/";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            // 发起http请求
-            SpiderReqResult srr = SpiderReq.get(su);
-            String html = srr.content;
+            String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
@@ -245,9 +238,7 @@ public class Nfx extends Spider {
         try {
             // 视频详情url
             String url = siteUrl + "/voddetail/" + ids.get(0) + "/";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
@@ -393,9 +384,7 @@ public class Nfx extends Spider {
 
             // 播放页 url
             String url = siteUrl + "/vodplay/" + id + "/";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements allScript = doc.select("script");
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
@@ -432,10 +421,7 @@ public class Nfx extends Spider {
                 return "";
             long currentTime = System.currentTimeMillis();
             String url = siteUrl + "/index.php/ajax/suggest?mid=1&wd=" + URLEncoder.encode(key) + "&limit=10&timestamp=" + currentTime;
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            //Document doc = Jsoup.parse(srr.content);
-            JSONObject searchResult = new JSONObject(srr.content);
+            JSONObject searchResult = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONArray videos = new JSONArray();
             if (searchResult.getInt("total") > 0) {

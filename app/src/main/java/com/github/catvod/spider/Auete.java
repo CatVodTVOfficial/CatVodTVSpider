@@ -6,9 +6,7 @@ import android.util.Base64;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,6 +48,7 @@ public class Auete extends Spider {
     //筛选页URL规则
     //private Pattern regexPage = Pattern.compile("/\\w+/\\w+/index(\\d+).html");
     private Pattern regexPage = Pattern.compile("/index(\\d+).html");
+
     @Override
     public void init(Context context) {
         super.init(context);
@@ -88,9 +87,7 @@ public class Auete extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            SpiderUrl su = new SpiderUrl(siteUrl, getHeaders(siteUrl));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
             Elements elements = doc.select("ul[class='navbar-nav mr-auto']> li a");
             JSONArray classes = new JSONArray();
@@ -101,7 +98,7 @@ public class Auete extends Spider {
                         name.equals("电视剧") ||
                         name.equals("综艺") ||
                         name.equals("动漫") ||
-                        name.equals("其他")  ;
+                        name.equals("其他");
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
@@ -169,27 +166,24 @@ public class Auete extends Spider {
                 for (Iterator<String> it = extend.keySet().iterator(); it.hasNext(); ) {
                     String key = it.next();
                     String value = extend.get(key);
-                    if(value != null && value.length() != 0 && value != " "){
-                    url = siteUrl + "/" + tid + "/" + value;}
-                    else{
+                    if (value != null && value.length() != 0 && value != " ") {
+                        url = siteUrl + "/" + tid + "/" + value;
+                    } else {
                         url = siteUrl + "/" + tid;
-                    };
+                    }
+                    ;
                 }
-            }
-            else{
+            } else {
                 url = siteUrl + "/" + tid;
-            };
-            if(pg.equals("1")){
-                url=url +"/index.html";
             }
-            else{
-                url=url +"/index"+ pg + ".html";
+            ;
+            if (pg.equals("1")) {
+                url = url + "/index.html";
+            } else {
+                url = url + "/index" + pg + ".html";
             }
             //System.out.println(url);
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            // 发起http请求
-            SpiderReqResult srr = SpiderReq.get(su);
-            String html = srr.content;
+            String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
@@ -215,11 +209,11 @@ public class Auete extends Spider {
                             page = Integer.parseInt(matcher.group(1));
                         } else {
                             Elements list = doc.select("ul.threadlist li");
-                            if(list.size()>0){
+                            if (list.size() > 0) {
                                 page = 1;
+                            } else {
+                                page = 0;
                             }
-                            else{
-                            page = 0;}
                         }
                     }
                     if (name.equals("尾页")) {
@@ -279,11 +273,9 @@ public class Auete extends Spider {
     public String detailContent(List<String> ids) {
         try {
             // 视频详情url
-            String url = siteUrl + "/" + ids.get(0)+ "/";
+            String url = siteUrl + "/" + ids.get(0) + "/";
             //System.out.println(url);
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
@@ -291,18 +283,18 @@ public class Auete extends Spider {
             String cover = doc.selectFirst("div.cover a").attr("href");
             String title = doc.selectFirst("div.cover a").attr("title");
             Elements list1 = doc.select("div.message>p");
-            String desc = doc.select("div.message>p").get(list1.size()-1).text();
+            String desc = doc.select("div.message>p").get(list1.size() - 1).text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
             Elements span_text_muted = doc.select("div.message>p");
-            for (int i = 0; i < span_text_muted.size()-2; i++) {
+            for (int i = 0; i < span_text_muted.size() - 2; i++) {
                 Element text = span_text_muted.get(i);
                 String info = text.text();
                 if (info.contains("分类")) {
                     try {
                         category = text.text().split(": ")[1];
-                        } catch (Exception e) {
+                    } catch (Exception e) {
                         category = "";
-                        }
+                    }
                 } else if (info.contains("年份")) {
                     try {
                         year = text.text().split(": ")[1];
@@ -436,9 +428,7 @@ public class Auete extends Spider {
         try {
             // 播放页 url
             String url = siteUrl + id;
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             /*取得script下面的JS变量*/
             Elements e = doc.select("div>script");
             /*循环遍历script下面的JS变量*/
@@ -455,26 +445,26 @@ public class Auete extends Spider {
                         /*取到满足条件的JS变量*/
                         if (variable.contains("now")) {
                             String[] kvp = variable.split("=");
-                            player = kvp[1].replaceAll("\"","").replaceAll(";","");
-                            if(player.startsWith("base64")){
-                                String[] plist1 =player.split("\\(");
+                            player = kvp[1].replaceAll("\"", "").replaceAll(";", "");
+                            if (player.startsWith("base64")) {
+                                String[] plist1 = player.split("\\(");
                                 String[] plist2 = plist1[1].split("\\)");
                                 // 解码
                                 player = new String(Base64.decode(plist2[0].getBytes(), Base64.DEFAULT));
                                 //byte[] base64Data = Base64.getDecoder().decode(plist2[0]);
                                 //player = new String(base64Data, "utf-8");
                             }
-                            
+
                             if (!player.startsWith("http")) {
                                 player = siteUrl + player;
                             }
                         }
                         if (variable.contains("pn")) {
                             String[] kvp = variable.split("=");
-                            pn = kvp[1].replaceAll("\"","").replaceAll(";","");
+                            pn = kvp[1].replaceAll("\"", "").replaceAll(";", "");
                         }
                     }
-                    }
+                }
                 if (playerConfig.has(pn)) {
                     JSONObject pCfg = playerConfig.getJSONObject(pn);
                     String videoUrl = player;
@@ -505,9 +495,7 @@ public class Auete extends Spider {
             if (quick)
                 return "";
             String url = siteUrl + "/search.php?searchword=" + URLEncoder.encode(key);
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
 
             JSONArray videos = new JSONArray();
@@ -524,12 +512,9 @@ public class Auete extends Spider {
                 JSONObject v = new JSONObject();
 
                 // 视频封面
-                String vodurl = siteUrl + "/" + id+ "/";
-                SpiderUrl vodsu = new SpiderUrl(vodurl, getHeaders(vodurl));
-                SpiderReqResult vodsrr = SpiderReq.get(vodsu);
-                Document voddoc = Jsoup.parse(vodsrr.content);
+                String vodurl = siteUrl + "/" + id + "/";
+                Document voddoc = Jsoup.parse(OkHttpUtil.string(vodurl, getHeaders(vodurl)));
                 cover = voddoc.selectFirst("div.cover a").attr("href");
-
 
                 v.put("vod_id", id);
                 v.put("vod_name", title);

@@ -3,7 +3,12 @@ package com.github.catvod.demo;
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.github.catvod.spider.AppYsV2;
 import com.github.catvod.spider.XPath;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +22,45 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                AppYsV2 aidi1 = new AppYsV2();
+                aidi1.init(MainActivity.this, "NFTV###https://litecucumber.coding.net/p/cat/d/config/git/raw/master/appysv2.json###nftv");
+                String json = aidi1.homeContent(true);
+                System.out.println(json);
+                JSONObject homeContent = null;
+                try {
+                    homeContent = new JSONObject(aidi1.homeVideoContent());
+                    System.out.println(homeContent.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(aidi1.categoryContent("1", "1", false, null));
+                if (homeContent != null) {
+                    try {
+                        List<String> ids = new ArrayList<String>();
+                        JSONArray array = homeContent.getJSONArray("list");
+                        for (int i = 0; i < array.length() && i < 3; i++) {
+                            try {
+                                ids.clear();
+                                ids.add(array.getJSONObject(i).getString("vod_id"));
+                                System.out.println(aidi1.detailContent(ids));
+                                JSONObject detailContent = new JSONObject(aidi1.detailContent(ids)).getJSONArray("list").getJSONObject(0);
+                                String[] playFlags = detailContent.getString("vod_play_from").split("\\$\\$\\$");
+                                String[] playUrls = detailContent.getString("vod_play_url").split("\\$\\$\\$");
+                                for (int j = 0; j < playFlags.length; j++) {
+                                    String pu = playUrls[j].split("#")[0].split("\\$")[1];
+                                    System.out.println(aidi1.playerContent(playFlags[j], pu, new ArrayList<>()));
+                                }
+                            } catch (Throwable th) {
+
+                            }
+                        }
+                    } catch (Throwable th) {
+
+                    }
+                }
+                System.out.println(aidi1.searchContent("陪你一起", false));
+                System.out.println(aidi1.searchContent("顶楼", false));
+
                 XPath aidi = new XPath();
                 aidi.init(MainActivity.this, "{\n" +
                         "  \"ua\": \"\",\n" +

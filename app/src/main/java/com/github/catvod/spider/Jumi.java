@@ -2,13 +2,10 @@ package com.github.catvod.spider;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Base64;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,7 +15,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -32,7 +28,7 @@ import java.util.regex.Pattern;
 
 /**
  * Demo for self study
- * <p> 
+ * <p>
  * Source from Author: CatVod
  */
 
@@ -88,9 +84,7 @@ public class Jumi extends Spider {
     public String homeContent(boolean filter) {
         try {
             String url = siteUrl + '/';
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements elements = doc.select("ul.nav-menu>li>a");
             JSONArray classes = new JSONArray();
             ArrayList<String> allClass = new ArrayList<>();
@@ -149,8 +143,8 @@ public class Jumi extends Spider {
         return "";
     }
 
-    
-     /**
+
+    /**
      * 获取分类信息数据
      *
      * @param tid    分类id
@@ -178,9 +172,8 @@ public class Jumi extends Spider {
                 }
             }
             url += "/page/" + pg + ".html";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            String html = OkHttpUtil.string(url, getHeaders(url));
+            Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
             int page = -1;
@@ -215,7 +208,7 @@ public class Jumi extends Spider {
             }
 
             JSONArray videos = new JSONArray();
-            if (!srr.content.contains("没有找到您想要的结果哦")) {
+            if (!html.contains("没有找到您想要的结果哦")) {
                 // 取当前分类页的视频列表
                 Elements list = doc.select("ul.myui-vodlist li div.myui-vodlist__box");
                 for (int i = 0; i < list.size(); i++) {
@@ -249,7 +242,7 @@ public class Jumi extends Spider {
         return "";
     }
 
-     /**
+    /**
      * 视频详情信息
      *
      * @param ids 视频id
@@ -260,9 +253,7 @@ public class Jumi extends Spider {
         try {
             // 视频详情url
             String url = siteUrl + "/vod/" + ids.get(0) + ".html";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
@@ -330,7 +321,7 @@ public class Jumi extends Spider {
                     return 1;
                 }
             });
-                        
+
             // 取播放列表数据
             Elements sources = doc.select("div.myui-panel__head>ul").get(0).select("li");
             Elements sourceList = doc.select("div.tab-content>div.tab-pane");
@@ -386,7 +377,7 @@ public class Jumi extends Spider {
         return "";
     }
 
-   /**
+    /**
      * 获取视频播放信息
      *
      * @param flag     播放源
@@ -410,9 +401,7 @@ public class Jumi extends Spider {
 
             // 播放页 url
             String url = siteUrl + "/play/" + id + ".html";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements allScript = doc.select("script");
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
@@ -449,10 +438,7 @@ public class Jumi extends Spider {
                 return "";
             long currentTime = System.currentTimeMillis();
             String url = siteUrl + "/index.php/ajax/suggest?mid=1&wd=" + URLEncoder.encode(key) + "&limit=10&timestamp=" + currentTime;
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            //Document doc = Jsoup.parse(srr.content);
-            JSONObject searchResult = new JSONObject(srr.content);
+            JSONObject searchResult = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONArray videos = new JSONArray();
             if (searchResult.getInt("total") > 0) {

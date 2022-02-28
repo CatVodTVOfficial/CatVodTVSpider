@@ -3,6 +3,7 @@
 ```
 思维没有边界 一切皆有可能
 ```
+:rocket:[**TG交流群**](https://t.me/catvodtv_offical)
 
 本工程最终食用需配合 猫影视TV新版（一下简称为软件） **v2.0.0**及以上版本。
 
@@ -91,12 +92,22 @@
 
 ---
 
+**部分内置代理接口使用（需v2.0.9及以上版本）**
+
+入口 [Proxy](/app/src/main/java/com/github/catvod/spider/Proxy.java)
+
+图片代理，示例参考[Nekk](/app/src/main/java/com/github/catvod/spider/Nekk.java#L449)
+
+直播配置重定向代理，示例参考[TxtSubscribe](/app/src/main/java/com/github/catvod/live/TxtSubscribe.java)
+
+---
+
 ## 基础类
 ----
 
 > com.github.catvod.crawler.Spider 爬虫基类
 
-> com.github.catvod.crawler.SpiderReq 用于发起网络请求 获取网络数据
+> com.github.catvod.crawler.SpiderReq 用于发起网络请求 获取网络数据，请使用[OkHttpUtil](/app/src/main/java/com/github/catvod/utils/okhttp/OkHttpUtil.java)类，SpiderReq后续将删除
 
 > com.github.catvod.crawler.SpiderReqResult 网络请求结果
 

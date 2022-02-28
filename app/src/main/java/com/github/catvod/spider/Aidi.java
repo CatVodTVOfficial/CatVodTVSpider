@@ -5,9 +5,7 @@ import android.text.TextUtils;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -89,9 +87,7 @@ public class Aidi extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            SpiderUrl su = new SpiderUrl(siteUrl, getHeaders(siteUrl));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
             Elements elements = doc.select("ul.nav_list > li a");
             JSONArray classes = new JSONArray();
@@ -178,10 +174,7 @@ public class Aidi extends Spider {
             }
             // 获取分类数据的url
             String url = siteUrl + "/show/" + TextUtils.join("-", urlParams) + ".html";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            // 发起http请求
-            SpiderReqResult srr = SpiderReq.get(su);
-            String html = srr.content;
+            String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
@@ -264,9 +257,7 @@ public class Aidi extends Spider {
         try {
             // 视频详情url
             String url = siteUrl + "/movie/" + ids.get(0) + ".html";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
@@ -401,9 +392,7 @@ public class Aidi extends Spider {
         try {
             // 播放页 url
             String url = siteUrl + "/play/" + id + ".html";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements allScript = doc.select("script");
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
@@ -445,9 +434,7 @@ public class Aidi extends Spider {
             if (quick)
                 return "";
             String url = siteUrl + "/vsearch/-------------.html?wd=" + URLEncoder.encode(key) + "&submit=";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
 
             JSONArray videos = new JSONArray();

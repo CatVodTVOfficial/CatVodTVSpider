@@ -6,9 +6,8 @@ import android.util.Base64;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.okhttp.OKCallBack;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,6 +17,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -30,11 +30,15 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import okhttp3.Call;
+import okhttp3.Headers;
+import okhttp3.Response;
+
 
 public class Nekk extends Spider {
 
-    private static final String siteUrl = "https://9egood.com";
-    private static final String siteHost = "9egood.com";
+    private static final String siteUrl = "https://www.9ela.com";
+    private static final String siteHost = "www.9ela.com";
 
     protected JSONObject playerConfig;
     protected JSONObject filterConfig;
@@ -67,7 +71,7 @@ public class Nekk extends Spider {
         headers.put("Host", siteHost);
         headers.put("Upgrade-Insecure-Requests", "1");
         headers.put("DNT", "1");
-        headers.put("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36");
+        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.54 Safari/537.36");
         headers.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
         headers.put("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2");
         return headers;
@@ -78,9 +82,7 @@ public class Nekk extends Spider {
     public String homeContent(boolean filter) {
         try {
             String url = siteUrl + '/';
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements elements = doc.select("ul.nav-list > li a");
             JSONArray classes = new JSONArray();
             ArrayList<String> allClass = new ArrayList<>();
@@ -112,7 +114,7 @@ public class Nekk extends Spider {
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
                     String title = vod.selectFirst(".title").text();
-                    String cover = vod.selectFirst(".myui-vodlist__thumb").attr("data-original");
+                    String cover = fixCover(vod.selectFirst(".myui-vodlist__thumb").attr("data-original"));
                     String remark = vod.selectFirst("span.pic-text").text();
 
                     Matcher matcher = regexVid.matcher(vod.selectFirst(".myui-vodlist__thumb").attr("href"));
@@ -156,9 +158,8 @@ public class Nekk extends Spider {
                 }
             }
             url += "/page/" + pg + ".html";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            String html = OkHttpUtil.string(url, getHeaders(url));
+            Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
             int page = -1;
@@ -192,12 +193,12 @@ public class Nekk extends Spider {
             }
 
             JSONArray videos = new JSONArray();
-            if (!srr.content.contains("没有找到您想要的结果哦")) {
+            if (!html.contains("没有找到您想要的结果哦")) {
                 Elements list = doc.select("ul.myui-vodlist li div.myui-vodlist__box");
                 for (int i = 0; i < list.size(); i++) {
                     Element vod = list.get(i);
                     String title = vod.selectFirst(".title").text();
-                    String cover = vod.selectFirst(".myui-vodlist__thumb").attr("data-original");
+                    String cover = fixCover(vod.selectFirst(".myui-vodlist__thumb").attr("data-original"));
                     String remark = vod.selectFirst("span.pic-text").text();
 
                     Matcher matcher = regexVid.matcher(vod.selectFirst(".myui-vodlist__thumb").attr("href"));
@@ -229,15 +230,13 @@ public class Nekk extends Spider {
     public String detailContent(List<String> ids) {
         try {
             String url = siteUrl + "/voddetail/" + ids.get(0) + ".html";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
             String vid = doc.selectFirst("span.mac_hits").attr("data-id");
 
-            String cover = doc.selectFirst("a.myui-vodlist__thumb img").attr("data-original");
+            String cover = fixCover(doc.selectFirst("a.myui-vodlist__thumb img").attr("data-original"));
             String title = doc.selectFirst("div.myui-content__detail h1.title").text();
             String desc = Jsoup.parse(doc.selectFirst("meta[name=description]").attr("content")).text();
             String category = "", area = "", year = "", remark = "", director = "", actor = "";
@@ -357,9 +356,7 @@ public class Nekk extends Spider {
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
             String url = siteUrl + "/vodplay/" + id + ".html";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements allScript = doc.select("script");
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
@@ -387,7 +384,9 @@ public class Nekk extends Spider {
                         result.put("url", videoUrl);
                         if (flag.equals("9ekk")) {
                             JSONObject headers = new JSONObject();
-                            headers.put("Referer", " " + siteUrl);
+                            headers.put("User-Agent", " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.54 Safari/537.36");
+                            headers.put("Accept", " */*");
+                            headers.put("Connection", " keep-alive");
                             result.put("header", headers.toString());
                         } else {
                             result.put("header", "");
@@ -410,10 +409,7 @@ public class Nekk extends Spider {
                 return "";
             long currentTime = System.currentTimeMillis();
             String url = siteUrl + "/index.php/ajax/suggest?mid=1&wd=" + URLEncoder.encode(key) + "&limit=10&timestamp=" + currentTime;
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            //Document doc = Jsoup.parse(srr.content);
-            JSONObject searchResult = new JSONObject(srr.content);
+            JSONObject searchResult = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONArray videos = new JSONArray();
             if (searchResult.getInt("total") > 0) {
@@ -422,7 +418,7 @@ public class Nekk extends Spider {
                     JSONObject vod = lists.getJSONObject(i);
                     String id = vod.getString("id");
                     String title = vod.getString("name");
-                    String cover = vod.getString("pic");
+                    String cover = fixCover(vod.getString("pic"));
                     JSONObject v = new JSONObject();
                     v.put("vod_id", id);
                     v.put("vod_name", title);
@@ -437,5 +433,57 @@ public class Nekk extends Spider {
             SpiderDebug.log(e);
         }
         return "";
+    }
+
+    protected String fixCover(String cover) {
+        try {
+            return "proxy://do=nekk&pic=" + Base64.encodeToString(cover.getBytes("UTF-8"), Base64.DEFAULT | Base64.URL_SAFE | Base64.NO_WRAP);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return cover;
+    }
+
+    private static HashMap<String, String> nekkPicHeader = null;
+
+    public static Object[] loadPic(String pic) {
+        try {
+            pic = new String(Base64.decode(pic, Base64.DEFAULT | Base64.URL_SAFE | Base64.NO_WRAP), "UTF-8");
+
+            if (nekkPicHeader == null) {
+                nekkPicHeader = new HashMap<>();
+                nekkPicHeader.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.54 Safari/537.36");
+                nekkPicHeader.put("referer", siteUrl + "/");
+            }
+            OKCallBack.OKCallBackDefault callBack = new OKCallBack.OKCallBackDefault() {
+                @Override
+                protected void onFailure(Call call, Exception e) {
+
+                }
+
+                @Override
+                protected void onResponse(Response response) {
+
+                }
+            };
+            OkHttpUtil.get(OkHttpUtil.defaultClient(), pic, null, nekkPicHeader, callBack);
+            if (callBack.getResult().code() == 200) {
+                Headers headers = callBack.getResult().headers();
+                String type = headers.get("Content-Type");
+                if (type == null) {
+                    type = "application/octet-stream";
+                }
+                Object[] result = new Object[3];
+                result[0] = 200;
+                result[1] = type;
+                System.out.println(pic);
+                System.out.println(type);
+                result[2] = callBack.getResult().body().byteStream();
+                return result;
+            }
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
+        return null;
     }
 }

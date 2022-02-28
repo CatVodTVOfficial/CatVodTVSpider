@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import android.util.Base64;
 
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReqResult;
 import com.github.catvod.utils.Misc;
 
 import org.json.JSONException;
@@ -69,8 +68,8 @@ public class XPathMac extends XPath {
     public String homeContent(boolean filter) {
         String result = super.homeContent(filter);
         if (result.length() > 0 && playerConfigJs.length() > 0) { // 尝试通过playerConfigJs获取展示和flag匹配关系
-            SpiderReqResult srr = fetch(playerConfigJs);
-            Matcher matcher = Pattern.compile(playerConfigJsRegex).matcher(srr.content);
+            String webContent = fetch(playerConfigJs);
+            Matcher matcher = Pattern.compile(playerConfigJsRegex).matcher(webContent);
             if (matcher.find()) {
                 try {
                     JSONObject jsonObject = new JSONObject(matcher.group(1));
@@ -89,7 +88,7 @@ public class XPathMac extends XPath {
                     SpiderDebug.log(e);
                 }
             }
-            SpiderDebug.log(srr.content);
+            // SpiderDebug.log(webContent);
         }
         return result;
     }
@@ -126,8 +125,7 @@ public class XPathMac extends XPath {
         // 尝试分析直连
         if (decodePlayUrl) {
             try {
-                SpiderReqResult srr = fetch(webUrl);
-                Document doc = Jsoup.parse(srr.content);
+                Document doc = Jsoup.parse(fetch(webUrl));
                 Elements allScript = doc.select("script");
                 for (int i = 0; i < allScript.size(); i++) {
                     String scContent = allScript.get(i).html().trim();

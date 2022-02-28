@@ -2,14 +2,11 @@ package com.github.catvod.spider;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Base64;
-import com.github.catvod.utils.Misc;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.Misc;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,7 +17,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.net.URLEncoder;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -82,9 +78,7 @@ public class Juhi extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            SpiderUrl su = new SpiderUrl(siteUrl, getHeaders(siteUrl));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
             Elements elements = doc.select("ul.nav-menu > li > a");
             JSONArray classes = new JSONArray();
@@ -94,7 +88,7 @@ public class Juhi extends Spider {
                 boolean show = name.equals("电影") ||
                         name.equals("电视剧") ||
                         name.equals("综艺") ||
-                        name.equals("动漫") ;
+                        name.equals("动漫");
                 if (show) {
                     Matcher mather = regexCategory.matcher(ele.attr("href"));
                     if (!mather.find())
@@ -168,16 +162,13 @@ public class Juhi extends Spider {
             }
             // 获取分类数据的url
             String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + "/";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            // 发起http请求
-            SpiderReqResult srr = SpiderReq.get(su);
-            String html = srr.content;
+            String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
             int page = -1;
 
-            
+
             // 取页码相关信息
             Elements pageInfo = doc.select("ul.myui-page>li");
             if (pageInfo.size() == 0) {
@@ -254,11 +245,9 @@ public class Juhi extends Spider {
     public String detailContent(List<String> ids) {
         try {
             // 视频详情url
-            String url = siteUrl + "/voddetail/" + ids.get(0)+ "/";
+            String url = siteUrl + "/voddetail/" + ids.get(0) + "/";
             //System.out.println(url);
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
@@ -407,9 +396,7 @@ public class Juhi extends Spider {
 
             // 播放页 url
             String url = siteUrl + "/vodplay/" + id + "/";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements allScript = doc.select("script");
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
@@ -430,7 +417,7 @@ public class Juhi extends Spider {
                                 result.put("url", videoUrl);
                                 return result.toString();
                             } catch (Exception e) {
-                            SpiderDebug.log(e);
+                                SpiderDebug.log(e);
                             }
                         }
                         result.put("parse", pCfg.getInt("sn"));
@@ -449,8 +436,6 @@ public class Juhi extends Spider {
     }
 
 
-
-
     @Override
     public String searchContent(String key, boolean quick) {
         try {
@@ -458,10 +443,8 @@ public class Juhi extends Spider {
                 return "";
             long currentTime = System.currentTimeMillis();
             String url = siteUrl + "/index.php/ajax/suggest?mid=1&wd=" + URLEncoder.encode(key) + "&limit=10&timestamp=" + currentTime;
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
             //Document doc = Jsoup.parse(srr.content);
-            JSONObject searchResult = new JSONObject(srr.content);
+            JSONObject searchResult = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONArray videos = new JSONArray();
             if (searchResult.getInt("total") > 0) {

@@ -1,9 +1,8 @@
 package com.github.catvod.parser;
 
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderUrl;
 import com.github.catvod.utils.Misc;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONObject;
 
@@ -26,7 +25,7 @@ public class JsonSequence {
                     String parseUrl = jx.get(jxName) + url;
                     SpiderDebug.log(parseUrl);
                     try {
-                        String json = SpiderReq.get(new SpiderUrl(parseUrl, null)).content;
+                        String json = OkHttpUtil.string(parseUrl, null);
                         JSONObject taskResult = Misc.jsonParse(url, json);
                         if (taskResult == null)
                             continue;

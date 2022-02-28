@@ -3,10 +3,8 @@ package com.github.catvod.spider;
 import android.util.Base64;
 
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
-import com.github.catvod.utils.SSLSocketFactoryCompat;
+import com.github.catvod.utils.okhttp.OKCallBack;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,11 +14,8 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import okhttp3.Call;
 import okhttp3.Response;
 
 /**
@@ -69,44 +64,13 @@ public class XPathBde4 extends XPath {
         return url;
     }
 
-    static OkHttpClient respInterceptorClient = null;
-    static String m3u8Data = null;
-
-    static OkHttpClient respInterceptorClient() {
-        if (respInterceptorClient == null) {
-            OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                    .readTimeout(15, TimeUnit.SECONDS)
-                    .writeTimeout(15, TimeUnit.SECONDS)
-                    .connectTimeout(15, TimeUnit.SECONDS)
-                    .addInterceptor(new Interceptor() {
-                        @Override
-                        public Response intercept(Chain chain) throws IOException {
-                            Request request = chain.request();
-                            Response response = chain.proceed(request);
-                            try {
-                                m3u8Data = new String(Base64.encode(response.body().bytes(), Base64.DEFAULT));
-                            } catch (Exception e) {
-                                m3u8Data = null;
-                            }
-                            return response;
-                        }
-                    })
-                    .retryOnConnectionFailure(true)
-                    .sslSocketFactory(new SSLSocketFactoryCompat(SSLSocketFactoryCompat.trustAllCert), SSLSocketFactoryCompat.trustAllCert);
-            respInterceptorClient = builder.build();
-        }
-        return respInterceptorClient;
-    }
-
     @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
             fetchRule();
             String webUrl = rule.getPlayUrl().isEmpty() ? id : rule.getPlayUrl().replace("{playUrl}", id);
             SpiderDebug.log(webUrl);
-            SpiderUrl su = new SpiderUrl(webUrl, getHeaders(webUrl));
-            SpiderReqResult srr = SpiderReq.get(su);
-            String content = srr.content;
+            String content = OkHttpUtil.string(webUrl, getHeaders(webUrl));
             String startFlag = "var m3u8 = \"";
             int start = content.indexOf(startFlag);
             start = start + startFlag.length();
@@ -114,22 +78,54 @@ public class XPathBde4 extends XPath {
             String m3u8 = content.substring(start, end).replace("\\", "").replace("https", "http");
             SpiderDebug.log(m3u8);
             HashMap<String, String> headers = getHeaders(m3u8);
-            su = new SpiderUrl(m3u8, headers);
-            SpiderReq.get(respInterceptorClient(), su);
-            if (m3u8Data != null) {
-                HashMap<String, String> json = new HashMap<>();
+
+            OKCallBack<String> m3u8Callback = new OKCallBack<String>() {
+                @Override
+                public String onParseResponse(Call call, Response response) {
+                    try {
+                        return new String(Base64.encode(response.body().bytes(), Base64.DEFAULT));
+                    } catch (IOException e) {
+                        return "";
+                    }
+                }
+
+                @Override
+                public void onFailure(Call call, Exception e) {
+                    setResult("");
+                    SpiderDebug.log(e);
+                }
+
+                @Override
+                public void onResponse(String response) {
+                }
+            };
+            OkHttpUtil.get(OkHttpUtil.defaultClient(), m3u8, null, headers, m3u8Callback);
+            String m3u8Data = m3u8Callback.getResult();
+            if (m3u8Data != null && !m3u8Data.isEmpty()) {
+                JSONObject result = new JSONObject();
+                JSONObject json = new JSONObject();
                 json.put("data", m3u8Data);
                 json.put("t", tk);
-                SpiderReqResult srr1 = SpiderReq.postJson("https://cat.idontcare.top/ssr/bde4", json, new HashMap<>());
-                String url = srr1.content;
-                JSONObject result = new JSONObject();
+                OkHttpUtil.postJson(OkHttpUtil.defaultClient(), "https://cat.idontcare.top/ssr/bde4", json.toString(), new OKCallBack.OKCallBackString() {
+                    @Override
+                    public void onFailure(Call call, Exception e) {
+                    }
+
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            result.put("url", response);
+                        } catch (JSONException e) {
+                        }
+                    }
+                });
                 result.put("parse", 0);
                 result.put("playUrl", "");
                 if (!rule.getPlayUa().isEmpty()) {
                     result.put("ua", rule.getPlayUa());
                 }
-                result.put("url", url);
                 return result.toString();
+
             }
         } catch (Exception e) {
             SpiderDebug.log(e);

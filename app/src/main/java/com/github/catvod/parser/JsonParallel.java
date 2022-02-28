@@ -1,9 +1,8 @@
 package com.github.catvod.parser;
 
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderUrl;
 import com.github.catvod.utils.Misc;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONObject;
 
@@ -11,6 +10,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -25,6 +25,8 @@ import java.util.concurrent.Future;
  * Author: CatVod
  */
 public class JsonParallel {
+    private static final String ParseOKTag = "p_json_parse";
+
     public static JSONObject parse(LinkedHashMap<String, String> jx, String url) {
         try {
             if (jx.size() > 0) {
@@ -35,16 +37,19 @@ public class JsonParallel {
                 for (String jxName : jxNames) {
                     String parseUrl = jx.get(jxName) + url;
                     SpiderDebug.log(parseUrl);
-                    futures.add(completionService.submit(() -> {
-                        try {
-                            String json = SpiderReq.get(new SpiderUrl(parseUrl, null), "p_json_parse").content;
-                            JSONObject taskResult = Misc.jsonParse(url, json);
-                            taskResult.put("jxFrom", jxName);
-                            SpiderDebug.log(taskResult.toString());
-                            return taskResult;
-                        } catch (Throwable th) {
-                            SpiderDebug.log(th);
-                            return null;
+                    futures.add(completionService.submit(new Callable<JSONObject>() {
+                        @Override
+                        public JSONObject call() throws Exception {
+                            try {
+                                String json = OkHttpUtil.string(parseUrl, ParseOKTag, null);
+                                JSONObject taskResult = Misc.jsonParse(url, json);
+                                taskResult.put("jxFrom", jxName);
+                                SpiderDebug.log(taskResult.toString());
+                                return taskResult;
+                            } catch (Throwable th) {
+                                SpiderDebug.log(th);
+                                return null;
+                            }
                         }
                     }));
                 }
@@ -54,7 +59,7 @@ public class JsonParallel {
                     try {
                         pTaskResult = completed.get();
                         if (pTaskResult != null) {
-                            SpiderReq.cancel("p_json_parse");
+                            OkHttpUtil.cancel(ParseOKTag);
                             for (int j = 0; j < futures.size(); j++) {
                                 try {
                                     futures.get(j).cancel(true);

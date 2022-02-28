@@ -5,10 +5,8 @@ import android.text.TextUtils;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
 import com.github.catvod.utils.Misc;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 import com.github.catvod.xpath.XPathRule;
 
 import org.json.JSONArray;
@@ -51,8 +49,7 @@ public class XPath extends Spider {
             }
             try {
                 String webUrl = rule.getHomeUrl();
-                SpiderReqResult srr = fetch(webUrl);
-                JXDocument doc = JXDocument.create(srr.content);
+                JXDocument doc = JXDocument.create(fetch(webUrl));
                 if (rule.getCateManual().size() == 0) {
                     List<JXNode> navNodes = doc.selN(rule.getCateNode());
                     for (int i = 0; i < navNodes.size(); i++) {
@@ -141,9 +138,8 @@ public class XPath extends Spider {
         try {
             fetchRule();
             String webUrl = categoryUrl(tid, pg, filter, extend);
-            SpiderReqResult srr = fetch(webUrl);
             JSONArray videos = new JSONArray();
-            JXDocument doc = JXDocument.create(srr.content);
+            JXDocument doc = JXDocument.create(fetch(webUrl));
             List<JXNode> vodNodes = doc.selN(rule.getCateVodNode());
             for (int i = 0; i < vodNodes.size(); i++) {
                 String name = vodNodes.get(i).selOne(rule.getCateVodName()).asString().trim();
@@ -191,8 +187,8 @@ public class XPath extends Spider {
         try {
             fetchRule();
             String webUrl = rule.getDetailUrl().replace("{vid}", ids.get(0));
-            SpiderReqResult srr = fetch(webUrl);
-            JXDocument doc = JXDocument.create(srr.content);
+            String webContent = fetch(webUrl);
+            JXDocument doc = JXDocument.create(webContent);
             JXNode vodNode = doc.selNOne(rule.getDetailNode());
 
             String cover = "", title = "", desc = "", category = "", area = "", year = "", remark = "", director = "", actor = "";
@@ -318,7 +314,7 @@ public class XPath extends Spider {
             vod.put("vod_play_from", vod_play_from);
             vod.put("vod_play_url", vod_play_url);
 
-            detailContentExt(srr.content, vod);
+            detailContentExt(webContent, vod);
 
             JSONObject result = new JSONObject();
             JSONArray list = new JSONArray();
@@ -359,13 +355,13 @@ public class XPath extends Spider {
                 return "";
             }
             String webUrl = rule.getSearchUrl().replace("{wd}", URLEncoder.encode(key));
-            SpiderReqResult srr = fetch(webUrl);
+            String webContent = fetch(webUrl);
             JSONObject result = new JSONObject();
             JSONArray videos = new JSONArray();
             // add maccms suggest search api support
             if (rule.getSearchVodNode().startsWith("json:")) {
                 String[] node = rule.getSearchVodNode().substring(5).split(">");
-                JSONObject data = new JSONObject(srr.content);
+                JSONObject data = new JSONObject(webContent);
                 for (int i = 0; i < node.length; i++) {
                     if (i == node.length - 1) {
                         JSONArray vodArray = data.getJSONArray(node[i]);
@@ -392,7 +388,7 @@ public class XPath extends Spider {
                     }
                 }
             } else {
-                JXDocument doc = JXDocument.create(srr.content);
+                JXDocument doc = JXDocument.create(webContent);
                 List<JXNode> vodNodes = doc.selN(rule.getSearchVodNode());
                 for (int i = 0; i < vodNodes.size(); i++) {
                     String name = vodNodes.get(i).selOne(rule.getSearchVodName()).asString().trim();
@@ -456,8 +452,7 @@ public class XPath extends Spider {
         if (rule == null) {
             if (ext != null) {
                 if (ext.startsWith("http")) {
-                    SpiderUrl su = new SpiderUrl(ext, null);
-                    String json = SpiderReq.get(su).content;
+                    String json = OkHttpUtil.string(ext, null);
                     rule = XPathRule.fromJson(json);
                     loadRuleExt(json);
                 } else {
@@ -472,9 +467,8 @@ public class XPath extends Spider {
 
     }
 
-    protected SpiderReqResult fetch(String webUrl) {
+    protected String fetch(String webUrl) {
         SpiderDebug.log(webUrl);
-        SpiderUrl su = new SpiderUrl(webUrl, getHeaders(webUrl));
-        return SpiderReq.get(su);
+        return OkHttpUtil.string(webUrl, getHeaders(webUrl));
     }
 }

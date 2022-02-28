@@ -5,10 +5,8 @@ import android.text.TextUtils;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
 import com.github.catvod.utils.Misc;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,9 +54,7 @@ public class Ysgc extends Spider {
     public String homeContent(boolean filter) {
         try {
             String url = siteUrl + "/xgapp.php/v1/nav?token=";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONObject jsonObject = new JSONObject(srr.content);
+            JSONObject jsonObject = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONArray jsonArray = jsonObject.getJSONArray("data");
             JSONArray classes = new JSONArray();
             JSONObject filterConfig = new JSONObject();
@@ -144,9 +140,7 @@ public class Ysgc extends Spider {
     public String homeVideoContent() {
         try {
             String url = siteUrl + "/xgapp.php/v1/index_video?token=";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONObject jsonObject = new JSONObject(srr.content);
+            JSONObject jsonObject = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONArray jsonArray = jsonObject.getJSONArray("data");
             JSONArray videos = new JSONArray();
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -179,9 +173,7 @@ public class Ysgc extends Spider {
             for (String key : keys) {
                 url += "&" + key + "=" + URLEncoder.encode(extend.get(key));
             }
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONObject dataObject = new JSONObject(srr.content);
+            JSONObject dataObject = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONArray jsonArray = dataObject.getJSONArray("data");
             JSONArray videos = new JSONArray();
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -214,9 +206,7 @@ public class Ysgc extends Spider {
     public String detailContent(List<String> ids) {
         try {
             String url = siteUrl + "/xgapp.php/v1/video_detail?id=" + ids.get(0) + "&token=";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONObject jsonObject = new JSONObject(srr.content);
+            JSONObject jsonObject = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject dataObject = jsonObject.getJSONObject("data");
             if (dataObject.has("vod_info")) {
                 try {
@@ -310,8 +300,8 @@ public class Ysgc extends Spider {
                 String uuu = "https://www.ysgc.cc/static/player/dplayer.php?url=" + id;
                 HashMap<String, String> headers = new HashMap();
                 headers.put("referer", "https://www.ysgc.cc/");
-                SpiderReqResult srr = SpiderReq.get(new SpiderUrl(uuu, headers));
-                Matcher matcher = Pattern.compile("url: url\\+'(.+?)',").matcher(srr.content);
+                String content = OkHttpUtil.string(uuu, headers);
+                Matcher matcher = Pattern.compile("url: url\\+'(.+?)',").matcher(content);
                 if (matcher.find()) {
                     result.put("parse", 0);
                     result.put("playUrl", "");
@@ -326,8 +316,8 @@ public class Ysgc extends Spider {
                 return result.toString();
             } else if (id.contains("duoduozy.com") || id.contains("m3u8.cache.suoyo.cc")) {
                 String uuu = "https://www.6080kan.cc/app.php?url=" + id;
-                SpiderReqResult srr = SpiderReq.get(new SpiderUrl(uuu, null));
-                return Misc.jsonParse(id, srr.content).toString();
+                String content = OkHttpUtil.string(uuu, null);
+                return Misc.jsonParse(id, content).toString();
             }
             if (vipFlags.contains(flag)) {
                 try {
@@ -341,10 +331,8 @@ public class Ysgc extends Spider {
             }
             JSONObject playerObj = playerConfig.getJSONObject(flag);
             String parseUrl = playerObj.getString("parse_api") + id;
-            SpiderUrl su = new SpiderUrl(parseUrl, getHeaderJxs(parseUrl));
-            SpiderReqResult srr = SpiderReq.get(su);
-
-            JSONObject playerData = new JSONObject(srr.content);
+            String content = OkHttpUtil.string(parseUrl, getHeaderJxs(parseUrl));
+            JSONObject playerData = new JSONObject(content);
             JSONObject headers = new JSONObject();
             String ua = playerData.optString("user-agent", "");
             if (ua.trim().length() > 0) {
@@ -382,9 +370,8 @@ public class Ysgc extends Spider {
             return "";
         try {
             String url = siteUrl + "/xgapp.php/v1/search?text=" + URLEncoder.encode(key) + "&pg=1";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONObject dataObject = new JSONObject(srr.content);
+            String content = OkHttpUtil.string(url, getHeaders(url));
+            JSONObject dataObject = new JSONObject(content);
             JSONArray jsonArray = dataObject.getJSONArray("data");
             JSONArray videos = new JSONArray();
             for (int i = 0; i < jsonArray.length(); i++) {

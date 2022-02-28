@@ -1,14 +1,16 @@
 package com.github.catvod.spider;
 
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
+import com.github.catvod.utils.okhttp.OKCallBack;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
+
+import okhttp3.Call;
 
 public class XPathEgg extends XPath {
 
@@ -47,15 +49,25 @@ public class XPathEgg extends XPath {
             end = content.indexOf("';", start);
             String link5 = content.substring(start, end);
 
-            HashMap<String, String> json = new HashMap<>();
+            JSONObject json = new JSONObject();
             json.put("infoid", infoid);
             json.put("link5", link5);
             json.put("t", tk);
-            // Thanks 猫大
-            SpiderReqResult srr = SpiderReq.postJson("https://cat.idontcare.top/ssr/dandan", json, new HashMap<>());
-            JSONObject obj = new JSONObject(srr.content);
-            vod.put("vod_play_from", obj.getString("vod_play_from"));
-            vod.put("vod_play_url", obj.getString("vod_play_url"));
+            OkHttpUtil.postJson(OkHttpUtil.defaultClient(), "https://cat.idontcare.top/ssr/dandan", json.toString(), new OKCallBack.OKCallBackString() {
+                @Override
+                public void onFailure(Call call, Exception e) {
+                }
+
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        JSONObject obj = new JSONObject(response);
+                        vod.put("vod_play_from", obj.getString("vod_play_from"));
+                        vod.put("vod_play_url", obj.getString("vod_play_url"));
+                    } catch (JSONException e) {
+                    }
+                }
+            });
         } catch (Exception e) {
 
         }
@@ -73,14 +85,25 @@ public class XPathEgg extends XPath {
             headers.put("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36");
             headers.put("origin", "https://www.dandanzan.cc");
             headers.put("accept-language", "zh-CN,zh;q=0.9");
-            SpiderReqResult srr = SpiderReq.postForm(rule.getPlayUrl(), json, headers);
             JSONObject result = new JSONObject();
+            OkHttpUtil.post(OkHttpUtil.defaultClient(), rule.getPlayUrl(), json, headers, new OKCallBack.OKCallBackString() {
+                @Override
+                public void onFailure(Call call, Exception e) {
+                }
+
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        result.put("url", response);
+                    } catch (JSONException e) {
+                    }
+                }
+            });
             result.put("parse", 0);
             result.put("playUrl", "");
             if (!rule.getPlayUa().isEmpty()) {
                 result.put("ua", rule.getPlayUa());
             }
-            result.put("url", srr.content);
             return result.toString();
         } catch (Exception e) {
             SpiderDebug.log(e);

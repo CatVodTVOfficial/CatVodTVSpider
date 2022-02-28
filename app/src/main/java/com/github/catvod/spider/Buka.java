@@ -5,9 +5,7 @@ import android.text.TextUtils;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -90,9 +88,7 @@ public class Buka extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            SpiderUrl su = new SpiderUrl(siteUrl, getHeaders(siteUrl));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(siteUrl, getHeaders(siteUrl)));
             // 分类节点
             Elements elements = doc.select("ul.dropdown > li a");
             JSONArray classes = new JSONArray();
@@ -177,10 +173,7 @@ public class Buka extends Spider {
             }
             // 获取分类数据的url
             String url = siteUrl + "/vodshow/" + TextUtils.join("-", urlParams) + "/";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            // 发起http请求
-            SpiderReqResult srr = SpiderReq.get(su);
-            String html = srr.content;
+            String html = OkHttpUtil.string(url, getHeaders(url));
             Document doc = Jsoup.parse(html);
             JSONObject result = new JSONObject();
             int pageCount = 0;
@@ -261,9 +254,7 @@ public class Buka extends Spider {
         try {
             // 视频详情url
             String url = siteUrl + "/voddetail/" + ids.get(0) + "/";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject result = new JSONObject();
             JSONObject vodList = new JSONObject();
 
@@ -397,9 +388,7 @@ public class Buka extends Spider {
         try {
             // 播放页 url
             String url = siteUrl + "/vodplay/" + id + "/";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            Document doc = Jsoup.parse(srr.content);
+            Document doc = Jsoup.parse(OkHttpUtil.string(url, getHeaders(url)));
             Elements allScript = doc.select("script");
             JSONObject result = new JSONObject();
             for (int i = 0; i < allScript.size(); i++) {
@@ -419,16 +408,12 @@ public class Buka extends Spider {
                             HashMap<String, String> hds = getHeaders(url);
                             hds.put("Host", "good-vip.mmiyue.com");
                             hds.put("Referer", url);
-                            SpiderUrl su1 = new SpiderUrl(playUrl + videoUrl, hds);
-                            SpiderReqResult srr1 = SpiderReq.get(su1);
-                            String content1 = srr1.content;
+                            String content1 = OkHttpUtil.string(playUrl + videoUrl, hds);
                             Document doc1 = Jsoup.parse(content1);
                             String url2 = "https:" + doc1.selectFirst("iframe#player").attr("src");
                             hds.put("Host", "pcc.mmiyue.com");
                             hds.put("Referer", "http://good-vip.mmiyue.com/");
-                            SpiderUrl su2 = new SpiderUrl(url2, hds);
-                            SpiderReqResult srr2 = SpiderReq.get(su2);
-                            String content2 = srr2.content;
+                            String content2 = OkHttpUtil.string(url2, hds);
                             String finder = "var id=\"";
                             start = content2.indexOf(finder) + finder.length();
                             end = content2.indexOf('\"', start);

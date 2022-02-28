@@ -4,9 +4,7 @@ import android.content.Context;
 
 import com.github.catvod.crawler.Spider;
 import com.github.catvod.crawler.SpiderDebug;
-import com.github.catvod.crawler.SpiderReq;
-import com.github.catvod.crawler.SpiderReqResult;
-import com.github.catvod.crawler.SpiderUrl;
+import com.github.catvod.utils.okhttp.OkHttpUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,9 +38,7 @@ public class Enlienli extends Spider {
     @Override
     public String homeContent(boolean filter) {
         try {
-            SpiderUrl su = new SpiderUrl(siteUrl + "/api.php/provide/home_nav?", getHeaders(siteUrl));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONArray jsonArray = new JSONArray(srr.content);
+            JSONArray jsonArray = new JSONArray(OkHttpUtil.string(siteUrl + "/api.php/provide/home_nav?", getHeaders(siteUrl)));
             JSONArray classes = new JSONArray();
             JSONObject filterConfig = new JSONObject();
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -107,9 +103,7 @@ public class Enlienli extends Spider {
     public String homeVideoContent() {
         try {
             String url = siteUrl + "/api.php/provide/home_data?page=1&id=0";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONObject jsonObject = new JSONObject(srr.content);
+            JSONObject jsonObject = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONArray jsonArray = new JSONArray();
             if (jsonObject.has("tv")) {
                 JSONArray data = jsonObject.getJSONObject("tv").getJSONArray("data");
@@ -155,9 +149,7 @@ public class Enlienli extends Spider {
             for (String key : keys) {
                 url += "&" + key + "=" + URLEncoder.encode(extend.get(key));
             }
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONArray jsonArray = new JSONArray(srr.content);
+            JSONArray jsonArray = new JSONArray(OkHttpUtil.string(url, getHeaders(url)));
             JSONArray videos = new JSONArray();
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject vObj = jsonArray.getJSONObject(i);
@@ -189,9 +181,7 @@ public class Enlienli extends Spider {
     public String detailContent(List<String> ids) {
         try {
             String url = siteUrl + "/api.php/provide/vod_detail?token=&id=" + ids.get(0) + "&ac=vod_detail";
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONObject jsonObject = new JSONObject(srr.content);
+            JSONObject jsonObject = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONObject vodList = new JSONObject();
             vodList.put("vod_id", ids.get(0));
             vodList.put("vod_name", jsonObject.getString("name"));
@@ -239,9 +229,7 @@ public class Enlienli extends Spider {
             return "";
         try {
             String url = siteUrl + "/api.php/provide/search_result?video_name=" + URLEncoder.encode(key);
-            SpiderUrl su = new SpiderUrl(url, getHeaders(url));
-            SpiderReqResult srr = SpiderReq.get(su);
-            JSONObject jsonObject = new JSONObject(srr.content);
+            JSONObject jsonObject = new JSONObject(OkHttpUtil.string(url, getHeaders(url)));
             JSONArray jsonArray = jsonObject.getJSONObject("result").getJSONArray("search_result");
             JSONArray videos = new JSONArray();
             for (int i = 0; i < jsonArray.length(); i++) {
