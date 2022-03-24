@@ -84,7 +84,7 @@
     "type": 3,
     "api": "csp_Nekk",
     "searchable": 1,
-    "quickSearch": 0,
+    "quickSearch": 1,
     "filterable": 1
   },
   {
